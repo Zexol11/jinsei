@@ -1,0 +1,22 @@
+# ===== Backend (Laravel) =====
+backend/.env
+backend/.env.backup
+backend/vendor/
+backend/storage/logs/*
+backend/storage/debugbar/
+backend/bootstrap/cache/*
+backend/.phpunit.result.cache
+
+# ===== Frontend (Next.js) =====
+frontend/.env.local
+frontend/.env*.local
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+
+# ===== OS / Editor =====
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/settings.json
+*.log
