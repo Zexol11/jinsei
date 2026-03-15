@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -24,7 +25,7 @@ return new class extends Migration
         });
 
         // Fast lookups for calendar and insights queries
-        \DB::statement('CREATE INDEX idx_journal_entries_user_date ON journal_entries (user_id, entry_date DESC)');
+        DB::statement('CREATE INDEX idx_journal_entries_user_date ON journal_entries (user_id, entry_date DESC)');
     }
 
     public function down(): void
