@@ -44,7 +44,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-white tracking-tight">Micro-Journal</h1>
+          <h1 className="text-2xl font-semibold text-white tracking-tight">MicroJournal</h1>
           <p className="text-zinc-500 text-sm mt-1">Create your account</p>
         </div>
 

@@ -39,7 +39,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo / Title */}
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-white tracking-tight">Micro-Journal</h1>
+          <h1 className="text-2xl font-semibold text-white tracking-tight">MicroJournal</h1>
           <p className="text-zinc-500 text-sm mt-1">Welcome back</p>
         </div>
 

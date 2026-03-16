@@ -31,4 +31,12 @@ class User extends Authenticatable
             'password'          => 'hashed',
         ];
     }
+
+    /**
+     * Get the journal entries for the user.
+     */
+    public function journalEntries(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(JournalEntry::class);
+    }
 }
