@@ -1,6 +1,7 @@
 'use client';
 
 import JournalEditor from '@/components/JournalEditor';
+import AppLayout from '@/components/AppLayout';
 import withAuth from '@/components/withAuth';
 import api from '@/lib/api';
 import { format, isToday, parseISO } from 'date-fns';
@@ -43,42 +44,58 @@ function Dashboard() {
     fetchEntries();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4 md:p-8">
-      <div className="max-w-3xl mx-auto space-y-8">
-        
-        {/* Header */}
-        <header className="flex items-center justify-between border-b border-zinc-800 pb-5">
-          <h1 className="text-2xl font-semibold tracking-tight">MicroJournal</h1>
-          
-          {!loading && !hasEntryToday && (
-            <Link 
-              href={`/entry/${format(new Date(), 'yyyy-MM-dd')}`}
-              className="flex items-center gap-2 bg-white text-zinc-950 px-4 py-2 rounded-lg text-sm font-medium hover:bg-zinc-200 transition"
-            >
-              <Plus size={16} />
-              Write Today's Entry
-            </Link>
-          )}
-        </header>
+  const headerActions = !loading && !hasEntryToday ? (
+    <Link 
+      href={`/entry/${format(new Date(), 'yyyy-MM-dd')}`}
+      className="flex items-center gap-2 bg-white text-zinc-950 px-4 py-2 rounded-lg text-sm font-medium hover:bg-zinc-200 transition"
+    >
+      <Plus size={16} />
+      Write Today
+    </Link>
+  ) : null;
 
-        {/* Entries List */}
-        {loading ? (
-          <div className="text-zinc-500 animate-pulse">Loading your journal...</div>
-        ) : entries.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
-            <PenLine className="w-10 h-10 text-zinc-600 mx-auto mb-4" />
-            <h2 className="text-lg font-medium text-white mb-2">No entries yet</h2>
-            <p className="text-zinc-500 text-sm mb-6 max-w-sm mx-auto">
-              You haven't written anything yet. Start your journaling journey by creating your first entry today.
-            </p>
+  return (
+    <AppLayout title="Dashboard" headerActions={headerActions}>
+      {/* Entries List */}
+      {loading ? (
+        <div className="space-y-6 animate-pulse">
+          
+          <div className="flex justify-center py-4 mb-4">
+            <div className="bg-zinc-800/50 p-4 rounded-full flex items-center justify-center animate-bounce shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+              <PenLine className="w-6 h-6 text-zinc-500" />
+            </div>
           </div>
-        ) : (
-          <div className="space-y-6">
-            {entries.map(entry => (
+
+          {[1, 2, 3].map(i => (
+            <div key={i} className="block bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-6 h-[170px]">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-32 h-5 bg-zinc-800/60 rounded" />
+                <div className="w-10 h-8 bg-zinc-800/60 rounded-full" />
+              </div>
+              <div className="space-y-3 mt-6">
+                <div className="w-full h-4 bg-zinc-800/40 rounded" />
+                <div className="w-5/6 h-4 bg-zinc-800/40 rounded" />
+                <div className="w-2/3 h-4 bg-zinc-800/40 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : entries.length === 0 ? (
+        <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
+          <PenLine className="w-10 h-10 text-zinc-600 mx-auto mb-4" />
+          <h2 className="text-lg font-medium text-white mb-2">No entries yet</h2>
+          <p className="text-zinc-500 text-sm mb-6 max-w-sm mx-auto">
+            You haven't written anything yet. Start your journaling journey by creating your first entry today.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {entries.map(entry => {
+            const dateParam = format(parseISO(entry.entry_date), 'yyyy-MM-dd');
+            return (
               <Link 
                 key={entry.id} 
-                href={`/entry/${entry.entry_date}`}
+                href={`/entry/${dateParam}`}
                 className="block group bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 hover:bg-zinc-900 transition"
               >
                 <div className="flex items-center justify-between mb-4">
@@ -98,12 +115,11 @@ function Dashboard() {
                   dangerouslySetInnerHTML={{ __html: entry.content }}
                 />
               </Link>
-            ))}
-          </div>
-        )}
-
-      </div>
-    </div>
+            );
+          })}
+        </div>
+      )}
+    </AppLayout>
   );
 }
 

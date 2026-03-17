@@ -65,4 +65,23 @@ class AuthTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseCount('personal_access_tokens', 0);
     }
+
+    public function test_user_can_update_profile()
+    {
+        $user = User::factory()->create([
+            'name' => 'Old Name',
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->patchJson('/api/v1/auth/me', [
+            'name' => 'New Name',
+        ]);
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('name', 'New Name');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'New Name',
+        ]);
+    }
 }

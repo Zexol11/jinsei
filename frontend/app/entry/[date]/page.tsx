@@ -1,6 +1,7 @@
 'use client';
 
 import JournalEditor from '@/components/JournalEditor';
+import MoodSelector, { Mood } from '@/components/MoodSelector';
 import withAuth from '@/components/withAuth';
 import api from '@/lib/api';
 import { format, parseISO } from 'date-fns';
@@ -8,13 +9,7 @@ import { ArrowLeft, Check, Loader2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-interface Mood {
-  id: number;
-  label: string;
-  emoji: string;
-  value: number;
-}
+import AppLayout from '@/components/AppLayout';
 
 function EntryPage() {
   const params = useParams();
@@ -130,33 +125,22 @@ function EntryPage() {
     formattedDate = decodeURIComponent(dateStr); // fallback if invalid
   }
 
+  const headerActions = isExisting ? (
+    <button
+      onClick={() => setShowDeleteModal(true)}
+      disabled={deleting}
+      className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-400/10 transition flex items-center gap-2 text-sm font-medium"
+      title="Delete Entry"
+    >
+      {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+      <span className="hidden sm:inline">Delete</span>
+    </button>
+  ) : null;
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4 md:p-8">
-      <div className="max-w-3xl mx-auto space-y-6">
-        
-        {/* Navigation & Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Link 
-            href="/"
-            className="flex items-center gap-2 text-zinc-400 hover:text-white transition group text-sm font-medium"
-          >
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            Back to Dashboard
-          </Link>
+    <AppLayout title={formattedDate} headerActions={headerActions}>
+      <div className="space-y-6">
 
-          {isExisting && (
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              disabled={deleting}
-              className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-400/10 transition"
-              title="Delete Entry"
-            >
-              {deleting ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
-            </button>
-          )}
-        </div>
-
-        <h1 className="text-3xl font-semibold tracking-tight">{formattedDate}</h1>
 
         {error && (
           <div className="px-4 py-3 bg-red-950 border border-red-800 rounded-lg text-red-400 text-sm">
@@ -165,25 +149,11 @@ function EntryPage() {
         )}
 
         {/* Mood Selector */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-          <label className="block text-sm font-medium text-zinc-400 mb-4">How are you feeling today?</label>
-          <div className="flex flex-wrap gap-3">
-            {moods.map((mood) => (
-              <button
-                key={mood.id}
-                onClick={() => setSelectedMoodId(mood.id)}
-                className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border transition-all ${
-                  selectedMoodId === mood.id
-                    ? 'bg-zinc-800 border-zinc-600 ring-1 ring-zinc-500 scale-105'
-                    : 'bg-zinc-950 border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700'
-                }`}
-              >
-                <span className="text-2xl">{mood.emoji}</span>
-                <span className="text-xs font-medium text-zinc-300 capitalize">{mood.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        <MoodSelector 
+          moods={moods} 
+          selectedMoodId={selectedMoodId} 
+          onSelect={setSelectedMoodId} 
+        />
 
         {/* Editor */}
         <div className="space-y-4">
@@ -247,7 +217,7 @@ function EntryPage() {
           </div>
         </div>
       )}
-    </div>
+    </AppLayout>
   );
 }
 

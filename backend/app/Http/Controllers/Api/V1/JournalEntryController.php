@@ -24,6 +24,31 @@ class JournalEntryController extends Controller
     }
 
     /**
+     * Get a lightweight list of entry dates and moods for the calendar component.
+     */
+    public function calendar(Request $request): JsonResponse
+    {
+        $month = $request->query('month', Carbon::now()->format('Y-m'));
+        $start = Carbon::parse($month . '-01')->startOfMonth()->toDateString();
+        $end = Carbon::parse($month . '-01')->endOfMonth()->toDateString();
+
+        $entries = $request->user()->journalEntries()
+            ->with('mood:id,emoji,label,value')
+            ->whereBetween('entry_date', [$start, $end])
+            ->get(['id', 'entry_date', 'mood_id'])
+            ->mapWithKeys(function ($entry) {
+                return [
+                    $entry->entry_date->toDateString() => [
+                        'id' => $entry->id,
+                        'mood' => $entry->mood,
+                    ],
+                ];
+            });
+
+        return response()->json($entries);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request): JsonResponse

@@ -125,4 +125,26 @@ class JournalEntryTest extends TestCase
         $response->assertStatus(204);
         $this->assertDatabaseCount('journal_entries', 0);
     }
+
+    public function test_user_can_get_calendar_entries()
+    {
+        $date = Carbon::today()->toDateString();
+        
+        JournalEntry::factory()->create([
+            'user_id' => $this->user->id,
+            'mood_id' => $this->mood->id,
+            'entry_date' => $date,
+        ]);
+
+        JournalEntry::factory()->create([
+            'user_id' => $this->user->id,
+            'mood_id' => $this->mood->id,
+            'entry_date' => Carbon::today()->addMonths(2)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($this->user, 'sanctum')->getJson('/api/v1/entries/calendar');
+
+        $response->assertStatus(200)
+                 ->assertJsonCount(1); // Should only have this month
+    }
 }

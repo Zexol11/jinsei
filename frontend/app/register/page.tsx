@@ -19,7 +19,7 @@ export default function RegisterPage() {
     if (!loading && user) router.replace('/');
   }, [user, loading, router]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     setErrors({});
     setSubmitting(true);

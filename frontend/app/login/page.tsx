@@ -18,7 +18,7 @@ export default function LoginPage() {
     if (!loading && user) router.replace('/');
   }, [user, loading, router]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     setError('');
     setSubmitting(true);
