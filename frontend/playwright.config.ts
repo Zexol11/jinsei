@@ -19,10 +19,9 @@ export default defineConfig({
     },
   ],
 
-  // Playwright can automatically start our local Next.js dev server!
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: true, // If we already have it running in terminal, it skips starting a new one
-  },
+    reuseExistingServer: true,
+  }
 });
