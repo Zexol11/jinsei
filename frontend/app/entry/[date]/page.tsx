@@ -195,7 +195,7 @@ function EntryPage() {
           <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl w-full max-w-sm animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-lg font-medium text-white mb-2">Delete Entry</h3>
             <p className="text-sm text-zinc-400 mb-6">
-              Are you sure you want to delete this journal entry? This action cannot be undone.
+              Are you sure you want to delete this journal entry?
             </p>
             <div className="flex sm:flex-row flex-col-reverse gap-3 sm:justify-end">
               <button

@@ -1,5 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, LayoutDashboard, Calendar, TrendingUp, Settings } from 'lucide-react';
+import { LogOut, LayoutDashboard, Calendar, TrendingUp, Settings, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
@@ -28,6 +28,7 @@ export default function AppLayout({ children, title, headerActions }: AppLayoutP
     { label: 'Calendar', href: '/calendar', icon: Calendar },
     { label: 'Insights', href: '/insights', icon: TrendingUp },
     { label: 'Settings', href: '/settings', icon: Settings },
+    { label: 'Trash', href: '/trash', icon: Trash2 },
   ];
 
   const [miniInsights, setMiniInsights] = useState<{

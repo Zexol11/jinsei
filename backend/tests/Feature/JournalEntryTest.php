@@ -113,17 +113,20 @@ class JournalEntryTest extends TestCase
         $date = Carbon::today()->toDateString();
 
         JournalEntry::factory()->create([
-            'user_id' => $this->user->id,
-            'mood_id' => $this->mood->id,
+            'user_id'    => $this->user->id,
+            'mood_id'    => $this->mood->id,
             'entry_date' => $date,
         ]);
-
-        $this->assertDatabaseCount('journal_entries', 1);
 
         $response = $this->actingAs($this->user, 'sanctum')->deleteJson("/api/v1/entries/{$date}");
 
         $response->assertStatus(204);
-        $this->assertDatabaseCount('journal_entries', 0);
+
+        // The entry is now soft-deleted, it still exists in the DB with a deleted_at timestamp
+        $this->assertSoftDeleted('journal_entries', [
+            'user_id'    => $this->user->id,
+            'entry_date' => $date,
+        ]);
     }
 
     public function test_user_can_get_calendar_entries()

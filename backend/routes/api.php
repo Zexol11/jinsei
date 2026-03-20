@@ -41,5 +41,10 @@ Route::prefix('v1')->group(function () {
         
         // Insights
         Route::get('insights', [App\Http\Controllers\Api\V1\InsightsController::class, 'index']);
+
+        // Trash (soft-deleted entries)
+        Route::get('trash', [App\Http\Controllers\Api\V1\TrashController::class, 'index']);
+        Route::post('trash/{date}/restore', [App\Http\Controllers\Api\V1\TrashController::class, 'restore']);
+        Route::delete('trash/{date}', [App\Http\Controllers\Api\V1\TrashController::class, 'forceDestroy']);
     });
 });
