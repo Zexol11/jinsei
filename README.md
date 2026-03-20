@@ -2,6 +2,8 @@
 
 A minimal personal journaling web app. Write one rich-text entry per day, track your mood, and review your history through a calendar and insights dashboard.
 
+This is a self-project containing things I want to learn, things like unit testing, deploying independently using free tier services, and other more!
+
 ## Monorepo Structure
 
 ```
