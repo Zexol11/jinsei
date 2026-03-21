@@ -10,27 +10,36 @@ use Illuminate\Support\Carbon;
 
 class JournalEntryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    /** Display a listing of entries, optionally filtered by tag IDs. */
     public function index(Request $request): JsonResponse
     {
-        $entries = $request->user()->journalEntries()
-            ->with('mood')
-            ->orderBy('entry_date', 'desc')
-            ->paginate(15);
+        $query = $request->user()->journalEntries()
+            ->with(['mood', 'tags'])
+            ->orderBy('entry_date', 'desc');
 
-        return response()->json($entries);
+        // Optional: filter by one or more tag IDs (OR logic by default)
+        if ($request->filled('tags')) {
+            $tagIds = (array) $request->query('tags');
+            $mode   = $request->query('tags_mode', 'OR');
+
+            if (strtoupper($mode) === 'AND') {
+                foreach ($tagIds as $tagId) {
+                    $query->whereHas('tags', fn ($q) => $q->where('tags.id', $tagId));
+                }
+            } else {
+                $query->whereHas('tags', fn ($q) => $q->whereIn('tags.id', $tagIds));
+            }
+        }
+
+        return response()->json($query->paginate(15));
     }
 
-    /**
-     * Get a lightweight list of entry dates and moods for the calendar component.
-     */
+    /** Get a lightweight list of entry dates and moods for the calendar component. */
     public function calendar(Request $request): JsonResponse
     {
         $month = $request->query('month', Carbon::now()->format('Y-m'));
         $start = Carbon::parse($month . '-01')->startOfMonth()->toDateString();
-        $end = Carbon::parse($month . '-01')->endOfMonth()->toDateString();
+        $end   = Carbon::parse($month . '-01')->endOfMonth()->toDateString();
 
         $entries = $request->user()->journalEntries()
             ->with('mood:id,emoji,label,value')
@@ -39,7 +48,7 @@ class JournalEntryController extends Controller
             ->mapWithKeys(function ($entry) {
                 return [
                     $entry->entry_date->toDateString() => [
-                        'id' => $entry->id,
+                        'id'   => $entry->id,
                         'mood' => $entry->mood,
                     ],
                 ];
@@ -48,18 +57,17 @@ class JournalEntryController extends Controller
         return response()->json($entries);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    /** Store a newly created entry (optionally with tag IDs). */
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'mood_id' => ['required', 'exists:moods,id'],
+            'mood_id'    => ['required', 'exists:moods,id'],
             'entry_date' => ['required', 'date', 'before_or_equal:today'],
-            'content' => ['required', 'string'],
+            'content'    => ['required', 'string'],
+            'tag_ids'    => ['sometimes', 'array'],
+            'tag_ids.*'  => ['integer', 'exists:tags,id'],
         ]);
 
-        // Enforce one per day limit
         $date = Carbon::parse($data['entry_date'])->toDateString();
 
         $existing = $request->user()->journalEntries()
@@ -67,36 +75,38 @@ class JournalEntryController extends Controller
             ->first();
 
         if ($existing) {
-            return response()->json([
-                'message' => 'An entry already exists for this date.',
-            ], 422);
+            return response()->json(['message' => 'An entry already exists for this date.'], 422);
         }
 
         $entry = $request->user()->journalEntries()->create([
-            'mood_id' => $data['mood_id'],
+            'mood_id'    => $data['mood_id'],
             'entry_date' => $date,
-            'content' => $data['content'],
+            'content'    => $data['content'],
         ]);
 
-        return response()->json($entry->load('mood'), 201);
+        // Sync tags if provided (validates they belong to this user)
+        if (!empty($data['tag_ids'])) {
+            $validTagIds = $request->user()->tags()
+                ->whereIn('id', $data['tag_ids'])
+                ->pluck('id');
+            $entry->tags()->sync($validTagIds);
+        }
+
+        return response()->json($entry->load(['mood', 'tags']), 201);
     }
 
-    /**
-     * Display the specified resource by date.
-     */
+    /** Display the specified resource by date. */
     public function show(Request $request, string $date): JsonResponse
     {
         $entry = $request->user()->journalEntries()
-            ->with('mood')
+            ->with(['mood', 'tags'])
             ->where('entry_date', $date)
             ->firstOrFail();
 
         return response()->json($entry);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    /** Update an existing entry (optionally sync tags). */
     public function update(Request $request, string $date): JsonResponse
     {
         $entry = $request->user()->journalEntries()
@@ -104,18 +114,28 @@ class JournalEntryController extends Controller
             ->firstOrFail();
 
         $data = $request->validate([
-            'mood_id' => ['sometimes', 'exists:moods,id'],
-            'content' => ['sometimes', 'string'],
+            'mood_id'   => ['sometimes', 'exists:moods,id'],
+            'content'   => ['sometimes', 'string'],
+            'tag_ids'   => ['sometimes', 'array'],
+            'tag_ids.*' => ['integer', 'exists:tags,id'],
         ]);
 
-        $entry->update($data);
+        $entry->update(array_filter([
+            'mood_id' => $data['mood_id'] ?? null,
+            'content' => $data['content'] ?? null,
+        ], fn ($v) => $v !== null));
 
-        return response()->json($entry->load('mood'));
+        if (array_key_exists('tag_ids', $data)) {
+            $validTagIds = $request->user()->tags()
+                ->whereIn('id', $data['tag_ids'])
+                ->pluck('id');
+            $entry->tags()->sync($validTagIds);
+        }
+
+        return response()->json($entry->load(['mood', 'tags']));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    /** Remove the specified resource from storage (soft delete). */
     public function destroy(Request $request, string $date): JsonResponse
     {
         $entry = $request->user()->journalEntries()

@@ -39,4 +39,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(JournalEntry::class);
     }
+
+    /**
+     * Get the tags for the user.
+     */
+    public function tags(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Tag::class);
+    }
 }
