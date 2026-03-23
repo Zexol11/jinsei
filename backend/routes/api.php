@@ -47,6 +47,9 @@ Route::prefix('v1')->group(function () {
         Route::post('trash/{date}/restore', [App\Http\Controllers\Api\V1\TrashController::class, 'restore']);
         Route::delete('trash/{date}', [App\Http\Controllers\Api\V1\TrashController::class, 'forceDestroy']);
 
+        // Memories
+        Route::get('memories/on-this-day', [App\Http\Controllers\Api\V1\MemoryController::class, 'onThisDay']);
+
         // Tags
         Route::get('tags', [App\Http\Controllers\Api\V1\TagController::class, 'index']);
         Route::post('tags', [App\Http\Controllers\Api\V1\TagController::class, 'store']);

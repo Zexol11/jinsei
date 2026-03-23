@@ -4,6 +4,7 @@ import AppLayout from '@/components/AppLayout';
 import withAuth from '@/components/withAuth';
 import api from '@/lib/api';
 import { format, isToday, parseISO } from 'date-fns';
+import OnThisDayCard from '@/components/OnThisDayCard';
 import { PenLine, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -115,6 +116,9 @@ function Dashboard() {
           )}
         </div>
       )}
+
+      {/* On This Day Memories */}
+      <OnThisDayCard />
 
       {/* Entries List */}
       {(loading || isFiltering) ? (
