@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -8,8 +8,14 @@ export default function withAuth<P extends object>(
   Component: React.ComponentType<P>
 ) {
   return function ProtectedPage(props: P) {
-    const { user, loading } = useAuth();
+    const user = useAuthStore((s) => s.user);
+    const loading = useAuthStore((s) => s.loading);
+    const initialize = useAuthStore((s) => s.initialize);
     const router = useRouter();
+
+    useEffect(() => {
+      initialize();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
       if (!loading && !user) {

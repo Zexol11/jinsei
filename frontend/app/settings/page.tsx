@@ -2,13 +2,14 @@
 
 import withAuth from '@/components/withAuth';
 import api from '@/lib/api';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore } from '@/store/authStore';
 import { Save, User as UserIcon, Lock, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import AppLayout from '@/components/AppLayout';
 
 function SettingsPage() {
-  const { user, setUser } = useAuth();
+  const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
   
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');

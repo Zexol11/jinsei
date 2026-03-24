@@ -1,12 +1,14 @@
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore } from '@/store/authStore';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function RegisterPage() {
-  const { user, register, loading } = useAuth();
+  const user = useAuthStore((s) => s.user);
+  const register = useAuthStore((s) => s.register);
+  const loading = useAuthStore((s) => s.loading);
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -24,7 +26,7 @@ export default function RegisterPage() {
     setErrors({});
     setSubmitting(true);
     try {
-      await register(name, email, password, passwordConfirmation);
+      await register(name, email, password, passwordConfirmation, () => router.push('/'));
     } catch (err: unknown) {
       const apiErrors = (err as { response?: { data?: { errors?: Record<string, string[]> } } })
         ?.response?.data?.errors;

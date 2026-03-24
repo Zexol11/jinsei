@@ -1,8 +1,9 @@
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore } from '@/store/authStore';
 import { LogOut, LayoutDashboard, Calendar, TrendingUp, Settings, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 
 const MOOD_EMOJIS: Record<string, string> = {
@@ -20,7 +21,8 @@ interface AppLayoutProps {
 }
 
 export default function AppLayout({ children, title, headerActions }: AppLayoutProps) {
-  const { logout } = useAuth();
+  const logout = useAuthStore((s) => s.logout);
+  const router = useRouter();
   const pathname = usePathname();
 
   const navItems = [
@@ -146,7 +148,7 @@ export default function AppLayout({ children, title, headerActions }: AppLayoutP
         </nav>
 
         <button 
-          onClick={logout}
+          onClick={() => logout(() => router.push('/login'))}
           className="flex items-center gap-3 px-4 py-3 mt-auto rounded-xl text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition"
         >
           <LogOut size={20} />
