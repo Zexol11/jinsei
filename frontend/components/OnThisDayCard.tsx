@@ -38,20 +38,7 @@ export default function OnThisDayCard() {
     fetchMemories();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="mb-8 border border-blue-900/30 bg-blue-950/20 rounded-2xl p-6 animate-pulse">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-full bg-blue-900/40" />
-          <div className="h-5 w-32 bg-blue-900/40 rounded" />
-        </div>
-        <div className="space-y-3">
-          <div className="h-4 w-full bg-blue-900/20 rounded" />
-          <div className="h-4 w-5/6 bg-blue-900/20 rounded" />
-        </div>
-      </div>
-    );
-  }
+
 
   if (memories.length === 0) {
     return null;
