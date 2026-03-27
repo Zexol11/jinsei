@@ -55,5 +55,6 @@ Route::prefix('v1')->group(function () {
         Route::post('tags', [App\Http\Controllers\Api\V1\TagController::class, 'store']);
         Route::patch('tags/{tag}', [App\Http\Controllers\Api\V1\TagController::class, 'update']);
         Route::delete('tags/{tag}', [App\Http\Controllers\Api\V1\TagController::class, 'destroy']);
+
     });
 });

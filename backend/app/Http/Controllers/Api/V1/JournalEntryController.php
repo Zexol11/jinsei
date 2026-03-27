@@ -7,6 +7,8 @@ use App\Models\JournalEntry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class JournalEntryController extends Controller
 {
@@ -61,11 +63,13 @@ class JournalEntryController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'mood_id'    => ['required', 'exists:moods,id'],
-            'entry_date' => ['required', 'date', 'before_or_equal:today'],
-            'content'    => ['required', 'string'],
-            'tag_ids'    => ['sometimes', 'array'],
-            'tag_ids.*'  => ['integer', 'exists:tags,id'],
+            'mood_id'          => ['required', 'exists:moods,id'],
+            'entry_date'       => ['required', 'date', 'before_or_equal:today'],
+            'content'          => ['required', 'string'],
+            'tag_ids'          => ['sometimes', 'array'],
+            'tag_ids.*'        => ['integer', 'exists:tags,id'],
+            'images_to_delete' => ['sometimes', 'array'],
+            'images_to_delete.*' => ['string'],
         ]);
 
         $date = Carbon::parse($data['entry_date'])->toDateString();
@@ -92,6 +96,9 @@ class JournalEntryController extends Controller
             $entry->tags()->sync($validTagIds);
         }
 
+        // Destroy any removed Cloudinary images
+        $this->deleteCloudinaryImages($data['images_to_delete'] ?? []);
+
         return response()->json($entry->load(['mood', 'tags']), 201);
     }
 
@@ -114,10 +121,12 @@ class JournalEntryController extends Controller
             ->firstOrFail();
 
         $data = $request->validate([
-            'mood_id'   => ['sometimes', 'exists:moods,id'],
-            'content'   => ['sometimes', 'string'],
-            'tag_ids'   => ['sometimes', 'array'],
-            'tag_ids.*' => ['integer', 'exists:tags,id'],
+            'mood_id'            => ['sometimes', 'exists:moods,id'],
+            'content'            => ['sometimes', 'string'],
+            'tag_ids'            => ['sometimes', 'array'],
+            'tag_ids.*'          => ['integer', 'exists:tags,id'],
+            'images_to_delete'   => ['sometimes', 'array'],
+            'images_to_delete.*' => ['string'],
         ]);
 
         $entry->update(array_filter([
@@ -132,6 +141,9 @@ class JournalEntryController extends Controller
             $entry->tags()->sync($validTagIds);
         }
 
+        // Destroy any removed Cloudinary images
+        $this->deleteCloudinaryImages($data['images_to_delete'] ?? []);
+
         return response()->json($entry->load(['mood', 'tags']));
     }
 
@@ -145,5 +157,51 @@ class JournalEntryController extends Controller
         $entry->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Destroy an array of Cloudinary public IDs using a direct signed HTTP request.
+     * Uses Laravel Http facade instead of the Cloudinary PHP SDK to avoid SSL issues on Windows.
+     */
+    private function deleteCloudinaryImages(array $publicIds): void
+    {
+        if (empty($publicIds)) {
+            return;
+        }
+
+        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        $apiKey    = env('CLOUDINARY_API_KEY');
+        $apiSecret = env('CLOUDINARY_API_SECRET');
+        $isLocal   = env('APP_ENV') === 'local';
+
+        foreach ($publicIds as $publicId) {
+            try {
+                $timestamp = time();
+
+                // Build the string to sign — must be sorted alphabetically
+                $paramsToSign = "public_id={$publicId}&timestamp={$timestamp}";
+                $signature    = sha1($paramsToSign . $apiSecret);
+
+                $response = \Illuminate\Support\Facades\Http::withOptions([
+                    'verify' => !$isLocal, // disable SSL cert check locally
+                ])->asForm()->post(
+                    "https://api.cloudinary.com/v1_1/{$cloudName}/image/destroy",
+                    [
+                        'public_id' => $publicId,
+                        'timestamp' => $timestamp,
+                        'api_key'   => $apiKey,
+                        'signature' => $signature,
+                    ]
+                );
+
+                if ($response->failed()) {
+                    Log::warning("Cloudinary destroy returned non-ok for [{$publicId}]: " . $response->body());
+                } else {
+                    Log::info("Cloudinary asset deleted: [{$publicId}] — " . $response->json('result', 'unknown'));
+                }
+            } catch (\Exception $e) {
+                Log::error("Failed to delete Cloudinary asset [{$publicId}]: " . $e->getMessage());
+            }
+        }
     }
 }

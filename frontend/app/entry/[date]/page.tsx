@@ -1,6 +1,6 @@
 'use client';
 
-import JournalEditor from '@/components/JournalEditor';
+import JournalEditor, { extractPublicIds } from '@/components/JournalEditor';
 import MoodSelector, { Mood } from '@/components/MoodSelector';
 import TagInput, { Tag } from '@/components/TagInput';
 import withAuth from '@/components/withAuth';
@@ -23,6 +23,9 @@ function EntryPage() {
   // Tags
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  
+  // Cloudinary tracking
+  const [trackedPublicIds, setTrackedPublicIds] = useState<string[]>([]);
 
   const [isExisting, setIsExisting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -93,11 +96,16 @@ function EntryPage() {
     try {
       const tagIds = await resolveTagIds();
 
+      // Compute which images were removed from the draft
+      const currentPublicIds = extractPublicIds(content);
+      const imagesToDelete = trackedPublicIds.filter(id => !currentPublicIds.includes(id));
+
       if (isExisting) {
         await api.patch(`/entries/${dateStr}`, {
           mood_id: selectedMoodId,
           content,
           tag_ids: tagIds,
+          images_to_delete: imagesToDelete,
         });
       } else {
         await api.post('/entries', {
@@ -105,6 +113,7 @@ function EntryPage() {
           mood_id: selectedMoodId,
           content,
           tag_ids: tagIds,
+          images_to_delete: imagesToDelete,
         });
         setIsExisting(true);
       }
@@ -181,6 +190,7 @@ function EntryPage() {
           <JournalEditor
             content={content}
             onChange={setContent}
+            onPublicIdsTracked={setTrackedPublicIds}
           />
 
           {/* Tags */}

@@ -15,14 +15,47 @@ import {
   Image as ImageIcon, Loader2, Trash2
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import api from '@/lib/api';
+
+/**
+ * Helper function to extract all Cloudinary Public IDs from a TipTap HTML string.
+ */
+export const extractPublicIds = (html: string) => {
+  if (typeof document === 'undefined') return [];
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  return Array.from(doc.querySelectorAll('img[data-public-id]'))
+    .map(img => img.getAttribute('data-public-id'))
+    .filter((id): id is string => !!id);
+};
+
+// Extend the Image extension to support the data-public-id attribute
+const CustomImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      publicId: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-public-id'),
+        renderHTML: attributes => {
+          if (!attributes.publicId) return {};
+          return {
+            'data-public-id': attributes.publicId,
+          }
+        },
+      },
+    }
+  },
+})
 
 interface JournalEditorProps {
   content: string;
   onChange: (content: string) => void;
+  onPublicIdsTracked?: (ids: string[]) => void;
   editable?: boolean;
 }
 
-const MenuBar = ({ editor }: { editor: Editor | null }) => {
+const MenuBar = ({ editor, onImageUploaded }: { editor: Editor | null, onImageUploaded: (publicId: string) => void }) => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,8 +96,14 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
       const data = await res.json();
       
-      // Embed the returned secure URL directly into the editor
-      editor.chain().focus().setImage({ src: data.secure_url }).run();
+      // Insert the image into the editor with its publicId
+      (editor.chain().focus() as any).setImage({ 
+        src: data.secure_url, 
+        publicId: data.public_id 
+      }).run();
+
+      // Notify the component that a new ID has entered the session
+      onImageUploaded(data.public_id);
       
     } catch (err) {
       console.error('Image upload failed:', err);
@@ -72,7 +111,6 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       alert(`Failed to upload image: ${msg}`);
     } finally {
       setIsUploading(false);
-      // Reset the input so the same file could be uploaded again if needed
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -229,9 +267,8 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
       <div className="w-px h-6 bg-zinc-800 my-auto mx-1 shrink-0" />
 
-      {/* Specialized Tools */}
+      {/* Cloudinary Image Upload */}
       <div className="flex gap-1 items-center px-1">
-        {/* Hidden file input for images */}
         <input 
           type="file" 
           accept="image/*" 
@@ -239,7 +276,6 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           onChange={handleImageUpload} 
           className="hidden" 
         />
-
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -254,27 +290,39 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   );
 };
 
-export default function JournalEditor({ content, onChange, editable = true }: JournalEditorProps) {
+export default function JournalEditor({ content, onChange, onPublicIdsTracked, editable = true }: JournalEditorProps) {
+  const trackedIdsRef = useRef<Set<string>>(new Set());
+
+  // On mount, track initial IDs
+  useEffect(() => {
+    if (content) {
+      const initialIds = extractPublicIds(content);
+      initialIds.forEach(id => trackedIdsRef.current.add(id));
+      onPublicIdsTracked?.(Array.from(trackedIdsRef.current));
+    }
+  }, []); // Only on mount
+
+  const handleNewIdTracked = (id: string) => {
+    trackedIdsRef.current.add(id);
+    onPublicIdsTracked?.(Array.from(trackedIdsRef.current));
+  };
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-        },
+        heading: { levels: [1, 2, 3] },
       }),
       Underline,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
-      Image.configure({
+      CustomImage.configure({
         HTMLAttributes: {
           class: 'rounded-xl max-w-full h-auto max-h-[500px] object-cover border border-zinc-800 shadow-xl shadow-black/20 my-6 cursor-pointer',
         },
       }),
       BubbleMenuExtension.configure({
-        shouldShow: ({ editor, view, state, from, to }) => {
-          return editor.isActive('image');
-        },
+        shouldShow: ({ editor }) => editor.isActive('image'),
       }),
     ],
     content,
@@ -282,10 +330,7 @@ export default function JournalEditor({ content, onChange, editable = true }: Jo
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class:
-          'prose prose-invert max-w-none min-h-[350px] p-4 sm:p-6 outline-none text-zinc-300 \
-           prose-headings:text-zinc-100 prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg \
-           prose-p:leading-relaxed prose-code:text-blue-400 prose-code:bg-zinc-900/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none',
+        class: 'prose prose-invert max-w-none min-h-[350px] p-4 sm:p-6 outline-none text-zinc-300 prose-headings:text-zinc-100 prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:leading-relaxed prose-code:text-blue-400 prose-code:bg-zinc-900/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none',
       },
     },
     onUpdate: ({ editor }) => {
@@ -293,7 +338,7 @@ export default function JournalEditor({ content, onChange, editable = true }: Jo
     },
   });
 
-  // Keep content in sync if passed from outside (e.g., initial load)
+  // Keep content in sync if passed from outside
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
@@ -319,7 +364,7 @@ export default function JournalEditor({ content, onChange, editable = true }: Jo
           </div>
         </BubbleMenu>
       )}
-      {editable && <MenuBar editor={editor} />}
+      {editable && <MenuBar editor={editor} onImageUploaded={handleNewIdTracked} />}
       <EditorContent editor={editor} />
     </div>
   );

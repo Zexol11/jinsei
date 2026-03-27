@@ -4,7 +4,7 @@ import AppLayout from '@/components/AppLayout';
 import withAuth from '@/components/withAuth';
 import api from '@/lib/api';
 import { format, parseISO } from 'date-fns';
-import { Trash2, RotateCcw, Loader2, PackageOpen } from 'lucide-react';
+import { Trash2, RotateCcw, Loader2, PackageOpen, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Mood {
@@ -25,6 +25,10 @@ function TrashPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState('');
+
+  // Modal state
+  const [confirmDate, setConfirmDate] = useState<string | null>(null);
+  const [confirmDisplay, setConfirmDisplay] = useState('');
 
   async function fetchTrash() {
     try {
@@ -57,8 +61,20 @@ function TrashPage() {
     }
   }
 
-  async function handleForceDelete(date: string) {
-    if (!confirm('Permanently delete this entry? This cannot be undone.')) return;
+  function openDeleteModal(date: string, displayDate: string) {
+    setConfirmDate(date);
+    setConfirmDisplay(displayDate);
+  }
+
+  function closeDeleteModal() {
+    setConfirmDate(null);
+    setConfirmDisplay('');
+  }
+
+  async function handleForceDelete() {
+    if (!confirmDate) return;
+    const date = confirmDate;
+    closeDeleteModal();
     setActionLoading(`delete-${date}`);
     setError('');
     try {
@@ -141,7 +157,7 @@ function TrashPage() {
 
                     {/* Delete forever */}
                     <button
-                      onClick={() => handleForceDelete(dateStr)}
+                      onClick={() => openDeleteModal(dateStr, displayDate)}
                       disabled={!!actionLoading}
                       className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-300 px-3 py-2 rounded-lg hover:bg-red-500/10 transition disabled:opacity-50"
                     >
@@ -155,6 +171,45 @@ function TrashPage() {
           </div>
         )}
       </div>
+
+      {/* Permanent Delete Confirmation Modal */}
+      {confirmDate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={closeDeleteModal}
+          />
+          <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl w-full max-w-sm animate-in fade-in zoom-in-95 duration-200">
+            {/* Warning icon */}
+            <div className="flex items-center justify-center w-11 h-11 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
+              <AlertTriangle size={20} className="text-red-400" />
+            </div>
+            <h3 className="text-lg font-medium text-white mb-1">Delete Permanently?</h3>
+            <p className="text-sm text-zinc-400 mb-1">
+              You are about to permanently delete the entry for
+            </p>
+            <p className="text-sm font-medium text-white mb-5">{confirmDisplay}</p>
+            <p className="text-xs text-zinc-500 mb-6">
+              This action is <span className="text-red-400 font-medium">irreversible</span>. The entry and any uploaded images will be removed forever.
+            </p>
+            <div className="flex sm:flex-row flex-col-reverse gap-3 sm:justify-end">
+              <button
+                onClick={closeDeleteModal}
+                className="px-4 py-2 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800 text-sm transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleForceDelete}
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition"
+              >
+                <Trash2 size={14} />
+                Delete Forever
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }
