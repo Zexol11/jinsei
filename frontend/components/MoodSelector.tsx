@@ -15,26 +15,51 @@ interface MoodSelectorProps {
 
 export default function MoodSelector({ moods, selectedMoodId, onSelect }: MoodSelectorProps) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-      <label className="block text-sm font-medium text-zinc-400 mb-4">
-        How are you feeling today?
-      </label>
-      <div className="flex flex-wrap gap-3">
-        {moods.map((mood) => (
-          <button
-            key={mood.id}
-            type="button"
-            onClick={() => onSelect(mood.id)}
-            className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border transition-all ${
-              selectedMoodId === mood.id
-                ? 'bg-zinc-800 border-zinc-600 ring-1 ring-zinc-500 scale-105'
-                : 'bg-zinc-950 border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700'
-            }`}
-          >
-            <span className="text-2xl">{mood.emoji}</span>
-            <span className="text-xs font-medium text-zinc-300 capitalize">{mood.label}</span>
-          </button>
-        ))}
+    <div>
+      <p className="label-caps mb-4 font-inter" style={{ color: 'var(--on-surface-dim)' }}>Current Mood</p>
+      <div className="flex gap-4 sm:gap-6 mt-2">
+        {moods.map((mood) => {
+          const isSelected = selectedMoodId === mood.id;
+          return (
+            <button
+              key={mood.id}
+              type="button"
+              onClick={() => onSelect(mood.id)}
+              className="flex flex-col items-center group relative w-16"
+            >
+              <div 
+                className="w-14 h-14 sm:w-[68px] sm:h-[68px] rounded-[18px] flex items-center justify-center transition-all duration-300 z-10 mb-3"
+                style={{
+                  background: isSelected ? '#faebcf' : 'transparent',
+                  boxShadow: isSelected ? '0 10px 30px -5px rgba(0, 0, 0, 0.08)' : 'none',
+                  border: isSelected ? '1px solid rgba(0,0,0,0.04)' : '1px solid transparent',
+                  transform: isSelected ? 'translateY(-2px)' : 'translateY(0)',
+                }}
+              >
+                <span
+                  className="text-3xl sm:text-[2.25rem] transition-all duration-300"
+                  style={{
+                    filter: isSelected ? 'none' : 'grayscale(15%) opacity(0.85)',
+                    transform: isSelected ? 'scale(1.05)' : 'scale(1)',
+                  }}
+                >
+                  {mood.emoji}
+                </span>
+              </div>
+              <span
+                className="label-caps transition-all font-inter"
+                style={{
+                  color: isSelected ? '#6a5a40' : 'var(--outline)',
+                  fontWeight: isSelected ? 600 : 500,
+                  letterSpacing: '0.08em',
+                  fontSize: '0.65rem'
+                }}
+              >
+                {mood.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,27 +1,168 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+
+/* ─── Midnight Vellum — Light Mode Tokens ───────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces */
+  --surface:                   #edeae3;
+  --surface-container-lowest:  #e4e1da;
+  --surface-container-low:     #f5f3ee;
+  --surface-container:         #fffefb;
+  --surface-container-high:    #e8e5de;
+  --surface-container-highest: #dedad3;
+  --surface-variant:           #d8d5ce;
+  --surface-bright:            #f7f5f0;
+
+  /* Text */
+  --on-surface:         #1c1c1a;
+  --on-surface-variant: #4a4845;
+  --on-surface-dim:     #7a7875;
+
+  /* Primary (Forest green) */
+  --primary:           #3d6645;
+  --primary-dim:       #5a8a62;
+  --primary-container: #d6ecd8;
+  --on-primary:        #ffffff;
+
+  /* Outline */
+  --outline:         #9b9893;
+  --outline-variant: #bbbab4;
+
+  /* Semantic */
+  --error: #b3261e;
 }
 
+/* ─── Dark Mode Tokens (Midnight Forest) ────────────────────────────────────── */
+[data-theme="dark"] {
+  --surface:                   #0d0f0d;
+  --surface-container-lowest:  #000000;
+  --surface-container-low:     #111411;
+  --surface-container:         #171b17;
+  --surface-container-high:    #1c211d;
+  --surface-container-highest: #212722;
+  --surface-variant:           #212722;
+  --surface-bright:            #272e28;
+
+  --on-surface:         #e1e7df;
+  --on-surface-variant: #a7ada5;
+  --on-surface-dim:     #6b716a;
+
+  --primary:           #a7d1a5;
+  --primary-dim:       #99c398;
+  --primary-container: #294f2d;
+  --on-primary:        #234827;
+
+  --outline:         #717770;
+  --outline-variant: #434944;
+
+  --error: #f2b8b5;
+}
+
+/* ─── Tailwind Theme ────────────────────────────────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-vellum-surface:     var(--surface);
+  --color-vellum-container:   var(--surface-container);
+  --color-vellum-low:         var(--surface-container-low);
+  --color-vellum-high:        var(--surface-container-high);
+  --color-vellum-variant:     var(--surface-variant);
+  --color-vellum-on:          var(--on-surface);
+  --color-vellum-muted:       var(--on-surface-variant);
+  --color-vellum-dim:         var(--on-surface-dim);
+  --color-vellum-primary:     var(--primary);
+  --color-vellum-primary-dim: var(--primary-dim);
+  --color-vellum-primary-bg:  var(--primary-container);
+  --color-vellum-outline:     var(--outline);
+  --color-vellum-stroke:      var(--outline-variant);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Base Styles ───────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--surface);
+  color: var(--on-surface);
+  font-family: 'Noto Serif', Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ─── Typography Utilities ──────────────────────────────────────────────────── */
+.font-serif { font-family: 'Noto Serif', Georgia, serif; }
+.font-inter { font-family: 'Inter', system-ui, sans-serif; }
+
+.label-caps {
+  font-size: 0.625rem;   /* 10px */
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+/* ─── Scrollbar Suppression ─────────────────────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ─── Vellum Input ──────────────────────────────────────────────────────────── */
+.vellum-input {
+  width: 100%;
+  background: var(--surface-container-low);
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: var(--on-surface);
+  font-family: 'Noto Serif', serif;
+  font-size: 0.9375rem;
+  transition: border-color 0.15s;
+  outline: none;
+}
+.vellum-input::placeholder { color: var(--on-surface-dim); }
+.vellum-input:focus { border-color: var(--primary); }
+
+/* ─── Ghost Border Utility ──────────────────────────────────────────────────── */
+.ghost-border {
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 25%, transparent);
+}
+.ghost-border:hover {
+  border-color: color-mix(in srgb, var(--outline-variant) 50%, transparent);
+}
+
+/* ─── Vellum Card ───────────────────────────────────────────────────────────── */
+.vellum-card {
+  background: var(--surface-container);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+/* ─── Primary Button ────────────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #3d6645 !important;
+  color: #ffffff !important;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.625rem 1.5rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-primary:hover  { background: #4e7d58 !important; }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* ─── Animate-in (minimal polyfill for Tailwind animate-in) ─────────────────── */
+@keyframes fade-in   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes zoom-in   { from { transform: scale(0.96); } to { transform: scale(1); } }
+.animate-in { animation: fade-in 0.2s ease, zoom-in 0.2s ease; }

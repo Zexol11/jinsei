@@ -4,166 +4,186 @@ import AppLayout from '@/components/AppLayout';
 import withAuth from '@/components/withAuth';
 import api from '@/lib/api';
 import { format, parseISO } from 'date-fns';
-import { Trash2, RotateCcw, Loader2, PackageOpen, AlertTriangle } from 'lucide-react';
+import { RotateCcw, X, Loader2, BookOpen, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-interface Mood {
-  id: number;
-  label: string;
-  emoji: string;
-}
+interface Mood { id: number; label: string; emoji: string; }
+interface TrashedEntry { id: number; entry_date: string; title: string | null; content: string; mood: Mood; deleted_at: string; }
 
-interface TrashedEntry {
-  id: number;
-  entry_date: string;
-  mood: Mood;
-  deleted_at: string;
+function stripHtml(html: string) {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 function TrashPage() {
-  const [entries, setEntries] = useState<TrashedEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [entries,       setEntries]       = useState<TrashedEntry[]>([]);
+  const [loading,       setLoading]       = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [error, setError] = useState('');
-
-  // Modal state
-  const [confirmDate, setConfirmDate] = useState<string | null>(null);
-  const [confirmDisplay, setConfirmDisplay] = useState('');
+  const [error,         setError]         = useState('');
+  const [confirmDate,   setConfirmDate]   = useState<string | null>(null);
+  const [confirmTitle,  setConfirmTitle]  = useState('');
+  const [confirmEmpty,  setConfirmEmpty]  = useState(false);
 
   async function fetchTrash() {
     try {
       const res = await api.get('/trash');
       setEntries(res.data);
-    } catch {
-      setError('Failed to load trash.');
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError('Failed to load trash.'); }
+    finally { setLoading(false); }
   }
 
-  useEffect(() => {
-    fetchTrash();
-  }, []);
+  useEffect(() => { fetchTrash(); }, []);
 
   async function handleRestore(date: string) {
     setActionLoading(`restore-${date}`);
     setError('');
     try {
       await api.post(`/trash/${date}/restore`);
-      setEntries(prev => prev.filter(e => {
-        const d = format(parseISO(e.entry_date), 'yyyy-MM-dd');
-        return d !== date;
-      }));
+      setEntries(prev => prev.filter(e => format(parseISO(e.entry_date), 'yyyy-MM-dd') !== date));
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to restore entry.');
-    } finally {
-      setActionLoading(null);
-    }
-  }
-
-  function openDeleteModal(date: string, displayDate: string) {
-    setConfirmDate(date);
-    setConfirmDisplay(displayDate);
-  }
-
-  function closeDeleteModal() {
-    setConfirmDate(null);
-    setConfirmDisplay('');
+    } finally { setActionLoading(null); }
   }
 
   async function handleForceDelete() {
     if (!confirmDate) return;
     const date = confirmDate;
-    closeDeleteModal();
+    setConfirmDate(null);
     setActionLoading(`delete-${date}`);
     setError('');
     try {
       await api.delete(`/trash/${date}`);
-      setEntries(prev => prev.filter(e => {
-        const d = format(parseISO(e.entry_date), 'yyyy-MM-dd');
-        return d !== date;
-      }));
-    } catch {
-      setError('Failed to permanently delete entry.');
-    } finally {
-      setActionLoading(null);
-    }
+      setEntries(prev => prev.filter(e => format(parseISO(e.entry_date), 'yyyy-MM-dd') !== date));
+    } catch { setError('Failed to permanently delete entry.'); }
+    finally { setActionLoading(null); }
+  }
+
+  async function handleEmptyTrash() {
+    setConfirmEmpty(false);
+    setActionLoading('empty-trash');
+    setError('');
+    try {
+      await api.delete('/trash');
+      setEntries([]);
+    } catch { setError('Failed to empty trash.'); }
+    finally { setActionLoading(null); }
   }
 
   return (
-    <AppLayout title="Trash">
-      <div className="space-y-4">
+    <AppLayout>
+      <div className="px-8 md:px-12 xl:px-16 py-8">
 
-        {/* Info banner */}
-        <div className="flex items-center gap-3 px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-zinc-400">
-          <Trash2 size={16} className="shrink-0" />
-          <span>Deleted entries are kept here. Restore them or delete permanently.</span>
+        {/* Header */}
+        <div className="flex items-start justify-between mb-10">
+          <div>
+            <h1
+              className="text-3xl font-semibold"
+              style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
+            >
+              Trash
+            </h1>
+            <p className="text-sm mt-1 font-inter" style={{ color: 'var(--on-surface-dim)' }}>
+              Manage your deleted reflections.
+            </p>
+          </div>
+          {entries.length > 0 && (
+            <button
+              onClick={() => setConfirmEmpty(true)}
+              className="flex items-center gap-2 label-caps font-inter px-4 py-2 rounded-full border transition bg-transparent hover:bg-white/40 dark:hover:bg-red-950/20"
+              style={{ borderColor: 'var(--error)', color: 'var(--error)' }}
+            >
+              <AlertTriangle size={12} />
+              Empty Trash
+            </button>
+          )}
         </div>
 
-        {/* Error */}
         {error && (
-          <div className="px-4 py-3 bg-red-950 border border-red-800 rounded-xl text-red-400 text-sm">
+          <div className="mb-6 px-4 py-3 rounded-xl text-sm" style={{ background: '#fce4e4', color: 'var(--error)' }}>
             {error}
           </div>
         )}
 
-        {/* Skeleton loading */}
         {loading ? (
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 bg-zinc-900 border border-zinc-800 rounded-2xl animate-pulse" />
-            ))}
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--on-surface-dim)' }} />
           </div>
         ) : entries.length === 0 ? (
-          /* Empty state */
-          <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
-            <PackageOpen className="w-10 h-10 text-zinc-600 mx-auto mb-4" />
-            <h2 className="text-lg font-medium text-white mb-1">Trash is empty</h2>
-            <p className="text-zinc-500 text-sm">Deleted journal entries will appear here.</p>
+          <div className="flex flex-col items-center text-center py-32">
+            <BookOpen className="w-14 h-14 mb-4" style={{ color: 'var(--outline-variant)' }} />
+            <p className="text-base font-medium" style={{ color: 'var(--on-surface-dim)' }}>Trash is empty</p>
           </div>
         ) : (
-          /* Entry list */
-          <div className="space-y-3">
-            {entries.map(entry => {
-              const dateStr = format(parseISO(entry.entry_date), 'yyyy-MM-dd');
-              const displayDate = format(parseISO(entry.entry_date), 'MMMM d, yyyy');
-              const deletedDate = format(parseISO(entry.deleted_at), 'MMM d, yyyy');
+          <div>
+            {entries.map((entry, idx) => {
+              const dateStr    = format(parseISO(entry.entry_date), 'yyyy-MM-dd');
+              const dayOfWeek  = format(parseISO(entry.entry_date), 'EEEE');
+              const monthDay   = format(parseISO(entry.entry_date), 'MMM d, yyyy').toUpperCase();
+              const timeDeleted = format(parseISO(entry.deleted_at), 'h:mm a');
               const isRestoring = actionLoading === `restore-${dateStr}`;
-              const isDeleting = actionLoading === `delete-${dateStr}`;
+              const isDeleting  = actionLoading === `delete-${dateStr}`;
+              const excerpt     = stripHtml(entry.content).slice(0, 200);
+              const isLast      = idx === entries.length - 1;
 
               return (
                 <div
                   key={entry.id}
-                  className="flex items-center justify-between bg-zinc-900/50 border border-zinc-800 rounded-2xl px-5 py-4 gap-4"
+                  className="flex gap-8 md:gap-14 py-8"
+                  style={{ borderBottom: isLast ? 'none' : '1px solid var(--outline-variant)' }}
                 >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <span className="text-2xl shrink-0">{entry.mood.emoji}</span>
-                    <div className="min-w-0">
-                      <p className="text-white font-medium text-sm truncate">{displayDate}</p>
-                      <p className="text-zinc-500 text-xs mt-0.5">Deleted on {deletedDate}</p>
-                    </div>
+                  {/* Left: date */}
+                  <div className="w-28 shrink-0 pt-0.5">
+                    <p className="label-caps mb-0.5" style={{ color: 'var(--on-surface-dim)' }}>{monthDay}</p>
+                    <p
+                      className="text-xl font-medium"
+                      style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
+                    >
+                      {dayOfWeek}
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--on-surface-dim)' }}>{timeDeleted}</p>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    {/* Restore */}
-                    <button
-                      onClick={() => handleRestore(dateStr)}
-                      disabled={!!actionLoading}
-                      className="flex items-center gap-1.5 text-sm text-emerald-400 hover:text-emerald-300 px-3 py-2 rounded-lg hover:bg-emerald-500/10 transition disabled:opacity-50"
+                  {/* Right: content + actions */}
+                  <div className="flex-1 min-w-0">
+                    {entry.title && (
+                      <h2
+                        className="text-lg font-medium mb-1"
+                        style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
+                      >
+                        {entry.title}
+                      </h2>
+                    )}
+                    <p
+                      className="text-sm leading-relaxed line-clamp-3 mb-4"
+                      style={{ color: 'var(--on-surface-variant)' }}
                     >
-                      {isRestoring ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
-                      Restore
-                    </button>
+                      {excerpt || '(empty entry)'}
+                    </p>
 
-                    {/* Delete forever */}
-                    <button
-                      onClick={() => openDeleteModal(dateStr, displayDate)}
-                      disabled={!!actionLoading}
-                      className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-300 px-3 py-2 rounded-lg hover:bg-red-500/10 transition disabled:opacity-50"
-                    >
-                      {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                      Delete Forever
-                    </button>
+                    {/* Actions */}
+                    <div className="flex items-center gap-5 font-inter">
+                      <button
+                        onClick={() => handleRestore(dateStr)}
+                        disabled={!!actionLoading}
+                        className="flex items-center gap-1.5 label-caps px-3 py-1.5 rounded-lg transition disabled:opacity-40 hover:bg-[var(--surface-variant)]"
+                        style={{ color: 'var(--primary)' }}
+                      >
+                        {isRestoring
+                          ? <Loader2 size={12} className="animate-spin" />
+                          : <RotateCcw size={12} />}
+                        Restore
+                      </button>
+                      <button
+                        onClick={() => { setConfirmDate(dateStr); setConfirmTitle(entry.title || dayOfWeek); }}
+                        disabled={!!actionLoading}
+                        className="flex items-center gap-1.5 label-caps px-3 py-1.5 rounded-lg transition disabled:opacity-40 hover:bg-[var(--surface-variant)]"
+                        style={{ color: 'var(--on-surface-dim)' }}
+                      >
+                        {isDeleting
+                          ? <Loader2 size={12} className="animate-spin" />
+                          : <X size={12} />}
+                        Delete Permanently
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -172,39 +192,80 @@ function TrashPage() {
         )}
       </div>
 
-      {/* Permanent Delete Confirmation Modal */}
+      {/* ── Confirm Delete Modal ───────────────────────────────────────────── */}
       {confirmDate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={closeDeleteModal}
+            className="absolute inset-0 backdrop-blur-sm"
+            style={{ background: 'rgba(0,0,0,0.35)' }}
+            onClick={() => setConfirmDate(null)}
           />
-          <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl w-full max-w-sm animate-in fade-in zoom-in-95 duration-200">
-            {/* Warning icon */}
-            <div className="flex items-center justify-center w-11 h-11 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
-              <AlertTriangle size={20} className="text-red-400" />
-            </div>
-            <h3 className="text-lg font-medium text-white mb-1">Delete Permanently?</h3>
-            <p className="text-sm text-zinc-400 mb-1">
-              You are about to permanently delete the entry for
+          <div
+            className="relative rounded-2xl p-7 shadow-2xl w-full max-w-sm animate-in"
+            style={{ background: 'var(--surface-container)' }}
+          >
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}>
+              Delete Permanently?
+            </h3>
+            <p className="text-sm mb-1" style={{ color: 'var(--on-surface-variant)' }}>
+              You are about to permanently delete:
             </p>
-            <p className="text-sm font-medium text-white mb-5">{confirmDisplay}</p>
-            <p className="text-xs text-zinc-500 mb-6">
-              This action is <span className="text-red-400 font-medium">irreversible</span>. The entry and any uploaded images will be removed forever.
+            <p className="text-sm font-medium mb-4" style={{ color: 'var(--on-surface)' }}>"{confirmTitle}"</p>
+            <p className="text-xs mb-6" style={{ color: 'var(--on-surface-dim)' }}>
+              This action is <span style={{ color: 'var(--error)', fontWeight: 600 }}>irreversible</span>. The entry and all uploaded images will be removed forever.
             </p>
-            <div className="flex sm:flex-row flex-col-reverse gap-3 sm:justify-end">
+            <div className="flex gap-3 justify-end">
               <button
-                onClick={closeDeleteModal}
-                className="px-4 py-2 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800 text-sm transition"
+                onClick={() => setConfirmDate(null)}
+                className="px-4 py-2 rounded-full text-sm transition hover:opacity-80"
+                style={{ color: 'var(--on-surface-variant)', background: 'var(--surface-container-high)' }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleForceDelete}
-                className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition hover:opacity-80"
+                style={{ background: 'var(--error)', color: '#fff' }}
               >
-                <Trash2 size={14} />
                 Delete Forever
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirm Empty Trash Modal ──────────────────────────────────────── */}
+      {confirmEmpty && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 backdrop-blur-sm"
+            style={{ background: 'rgba(0,0,0,0.35)' }}
+            onClick={() => setConfirmEmpty(false)}
+          />
+          <div
+            className="relative rounded-2xl p-7 shadow-2xl w-full max-w-sm animate-in"
+            style={{ background: 'var(--surface-container)' }}
+          >
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}>
+              Empty Trash?
+            </h3>
+            <p className="text-sm mb-6" style={{ color: 'var(--on-surface-variant)' }}>
+              Are you sure you want to permanently delete all items in the trash? This action is <span style={{ color: 'var(--error)', fontWeight: 600 }}>irreversible</span>.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmEmpty(false)}
+                className="px-4 py-2 rounded-full text-sm transition hover:opacity-80"
+                style={{ color: 'var(--on-surface-variant)', background: 'var(--surface-container-high)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEmptyTrash}
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition hover:opacity-80"
+                style={{ background: 'var(--error)', color: '#fff' }}
+              >
+                Empty Trash
               </button>
             </div>
           </div>

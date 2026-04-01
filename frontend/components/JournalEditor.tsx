@@ -200,56 +200,74 @@ const MenuBar = ({ editor, onImageUploaded }: { editor: Editor | null, onImageUp
     }
   };
 
-  const active = "bg-zinc-800 text-white";
-  const normal = "text-zinc-400 hover:bg-zinc-800 hover:text-white";
-  const btn = (isOn: boolean) => `p-1.5 rounded-lg transition ${isOn ? active : normal}`;
-  const sep = <div className="w-px h-6 bg-zinc-800 my-auto mx-1 shrink-0" />;
+  const btnStyle = (isOn: boolean): React.CSSProperties => ({
+    padding: '0.375rem',
+    borderRadius: '0.5rem',
+    transition: 'color 0.1s, background 0.1s',
+    background: isOn ? 'var(--surface-container-high)' : 'transparent',
+    color: isOn ? 'var(--primary)' : 'var(--on-surface-dim)',
+    cursor: 'pointer',
+    border: 'none',
+  });
+  const sep = <div style={{ width: '1px', height: '1.25rem', background: 'var(--outline-variant)', margin: '0 4px', alignSelf: 'center' }} />;
 
   return (
-    <div className="flex flex-wrap gap-1 p-2 border-b border-zinc-800 bg-zinc-900/50 rounded-t-xl overflow-x-auto no-scrollbar">
+    <div
+      className="flex flex-wrap items-center gap-1 px-4 py-2 mt-4 mb-6 no-scrollbar overflow-x-auto rounded-xl"
+      style={{ 
+        background: 'var(--surface-container)', 
+        border: '1px solid color-mix(in srgb, var(--outline-variant) 40%, transparent)' 
+      }}
+    >
       {/* Formatting */}
-      <div className="flex gap-1 items-center px-1">
-        <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} disabled={!editor.can().chain().focus().toggleBold().run()} className={btn(editor.isActive('bold'))} title="Bold"><Bold size={16} /></button>
-        <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} disabled={!editor.can().chain().focus().toggleItalic().run()} className={btn(editor.isActive('italic'))} title="Italic"><Italic size={16} /></button>
-        <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={btn(editor.isActive('underline'))} title="Underline"><UnderlineIcon size={16} /></button>
-        <button type="button" onClick={() => editor.chain().focus().toggleStrike().run()} disabled={!editor.can().chain().focus().toggleStrike().run()} className={btn(editor.isActive('strike'))} title="Strikethrough"><Strikethrough size={16} /></button>
-        <button type="button" onClick={() => editor.chain().focus().toggleCode().run()} disabled={!editor.can().chain().focus().toggleCode().run()} className={btn(editor.isActive('code'))} title="Code"><Code size={16} /></button>
+      <div className="flex gap-0.5 items-center">
+        <button type="button" onClick={() => editor.chain().focus().toggleBold().run()}      style={btnStyle(editor.isActive('bold'))}      title="Bold"><Bold size={15} /></button>
+        <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()}    style={btnStyle(editor.isActive('italic'))}    title="Italic"><Italic size={15} /></button>
+        <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} style={btnStyle(editor.isActive('underline'))} title="Underline"><UnderlineIcon size={15} /></button>
+        <button type="button" onClick={() => editor.chain().focus().toggleStrike().run()}    style={btnStyle(editor.isActive('strike'))}    title="Strikethrough"><Strikethrough size={15} /></button>
+        <button type="button" onClick={() => editor.chain().focus().toggleCode().run()}      style={btnStyle(editor.isActive('code'))}      title="Code"><Code size={15} /></button>
       </div>
 
       {sep}
 
       {/* Headings */}
-      <div className="flex gap-1 items-center px-1">
-        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={btn(editor.isActive('heading', { level: 1 }))} title="Heading 1"><Heading1 size={16} /></button>
-        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={btn(editor.isActive('heading', { level: 2 }))} title="Heading 2"><Heading2 size={16} /></button>
-        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={btn(editor.isActive('heading', { level: 3 }))} title="Heading 3"><Heading3 size={16} /></button>
+      <div className="flex gap-0.5 items-center">
+        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} style={btnStyle(editor.isActive('heading', { level: 1 }))} title="H1"><Heading1 size={15} /></button>
+        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} style={btnStyle(editor.isActive('heading', { level: 2 }))} title="H2"><Heading2 size={15} /></button>
+        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} style={btnStyle(editor.isActive('heading', { level: 3 }))} title="H3"><Heading3 size={15} /></button>
       </div>
 
       {sep}
 
       {/* Alignment */}
-      <div className="flex gap-1 items-center px-1">
-        <button type="button" onClick={() => editor.chain().focus().setTextAlign('left').run()} className={btn(editor.isActive({ textAlign: 'left' }))} title="Align Left"><AlignLeft size={16} /></button>
-        <button type="button" onClick={() => editor.chain().focus().setTextAlign('center').run()} className={btn(editor.isActive({ textAlign: 'center' }))} title="Align Center"><AlignCenter size={16} /></button>
-        <button type="button" onClick={() => editor.chain().focus().setTextAlign('right').run()} className={btn(editor.isActive({ textAlign: 'right' }))} title="Align Right"><AlignRight size={16} /></button>
-        <button type="button" onClick={() => editor.chain().focus().setTextAlign('justify').run()} className={btn(editor.isActive({ textAlign: 'justify' }))} title="Justify"><AlignJustify size={16} /></button>
+      <div className="flex gap-0.5 items-center">
+        <button type="button" onClick={() => editor.chain().focus().setTextAlign('left').run()}    style={btnStyle(editor.isActive({ textAlign: 'left' }))}    title="Align Left"><AlignLeft size={15} /></button>
+        <button type="button" onClick={() => editor.chain().focus().setTextAlign('center').run()}  style={btnStyle(editor.isActive({ textAlign: 'center' }))}  title="Center"><AlignCenter size={15} /></button>
+        <button type="button" onClick={() => editor.chain().focus().setTextAlign('right').run()}   style={btnStyle(editor.isActive({ textAlign: 'right' }))}   title="Align Right"><AlignRight size={15} /></button>
+        <button type="button" onClick={() => editor.chain().focus().setTextAlign('justify').run()} style={btnStyle(editor.isActive({ textAlign: 'justify' }))} title="Justify"><AlignJustify size={15} /></button>
       </div>
 
       {sep}
 
       {/* Lists */}
-      <div className="flex gap-1 items-center px-1">
-        <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={btn(editor.isActive('bulletList'))} title="Bullet List"><List size={16} /></button>
-        <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={btn(editor.isActive('orderedList'))} title="Ordered List"><ListOrdered size={16} /></button>
+      <div className="flex gap-0.5 items-center">
+        <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()}  style={btnStyle(editor.isActive('bulletList'))}  title="Bullet List"><List size={15} /></button>
+        <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} style={btnStyle(editor.isActive('orderedList'))} title="Ordered List"><ListOrdered size={15} /></button>
       </div>
 
       {sep}
 
       {/* Image upload */}
-      <div className="flex gap-1 items-center px-1">
+      <div className="flex gap-0.5 items-center">
         <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
-        <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUploading} className={`p-1.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed ${normal}`} title="Upload image">
-          {isUploading ? <Loader2 size={16} className="animate-spin text-blue-400" /> : <ImageIcon size={16} />}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          style={btnStyle(false)}
+          title="Upload image"
+        >
+          {isUploading ? <Loader2 size={15} className="animate-spin" style={{ color: 'var(--primary-dim)' }} /> : <ImageIcon size={15} />}
         </button>
       </div>
     </div>
@@ -294,7 +312,12 @@ export default function JournalEditor({ content, onChange, onPublicIdsTracked, e
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: 'prose prose-invert max-w-none min-h-[350px] p-4 sm:p-6 outline-none text-zinc-300 prose-headings:text-zinc-100 prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:leading-relaxed prose-code:text-blue-400 prose-code:bg-zinc-900/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none',
+        class: 'prose prose-md max-w-none min-h-[300px] py-4 outline-none leading-relaxed',
+        style: [
+          `color: var(--on-surface)`,
+          `font-family: 'Noto Serif', serif`,
+          `font-size: 1rem`,
+        ].join(';'),
       },
     },
     onUpdate: ({ editor }) => {
@@ -309,17 +332,21 @@ export default function JournalEditor({ content, onChange, onPublicIdsTracked, e
   }, [content, editor]);
 
   return (
-    <div className="border border-zinc-800 bg-zinc-950 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-zinc-700 focus-within:border-transparent transition relative">
+    <div className="relative" style={{ background: 'transparent' }}>
       {editor && (
         <BubbleMenu
           editor={editor}
           shouldShow={({ editor }: { editor: Editor }) => editor.isActive('image')}
         >
-          <div className="flex bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl shadow-black/40 overflow-hidden">
+          <div
+            className="flex rounded-xl shadow-lg overflow-hidden"
+            style={{ background: 'var(--surface-container)', border: '1px solid var(--outline-variant)' }}
+          >
             <button
               type="button"
               onClick={() => editor.chain().focus().deleteSelection().run()}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium transition-colors"
+              style={{ color: 'var(--error)' }}
             >
               <Trash2 size={14} />
               Remove image
@@ -328,7 +355,15 @@ export default function JournalEditor({ content, onChange, onPublicIdsTracked, e
         </BubbleMenu>
       )}
       {editable && <MenuBar editor={editor} onImageUploaded={handleNewIdTracked} />}
-      <EditorContent editor={editor} />
+      <div 
+        className="rounded-2xl px-5 py-6 sm:px-8 sm:py-8 transition-colors duration-300"
+        style={{
+          background: 'color-mix(in srgb, var(--surface-container) 60%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--outline-variant) 30%, transparent)'
+        }}
+      >
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 }

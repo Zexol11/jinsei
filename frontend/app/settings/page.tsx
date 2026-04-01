@@ -3,158 +3,264 @@
 import withAuth from '@/components/withAuth';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
-import { Save, User as UserIcon, Lock, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
 
+const Row = ({ label, description, children }: { label: string; description?: string; children: React.ReactNode }) => (
+  <div className="flex flex-col md:flex-row md:gap-16 py-10" style={{ borderBottom: '1px solid var(--outline-variant)' }}>
+    <div className="md:w-56 shrink-0 mb-4 md:mb-0">
+      <p className="text-base font-medium" style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}>{label}</p>
+      {description && <p className="text-sm mt-1 leading-relaxed font-inter" style={{ color: 'var(--on-surface-dim)' }}>{description}</p>}
+    </div>
+    <div className="flex-1">{children}</div>
+  </div>
+);
+
 function SettingsPage() {
-  const user = useAuthStore((s) => s.user);
+  const user    = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
-  
-  const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
+
+  const [name,     setName]     = useState(user?.name  || '');
+  const [email,    setEmail]    = useState(user?.email || '');
   const [password, setPassword] = useState('');
-  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [pwConf,   setPwConf]   = useState('');
+  const [saving,   setSaving]   = useState(false);
+  const [success,  setSuccess]  = useState('');
+  const [error,    setError]    = useState('');
   
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deletingAcc,   setDeletingAcc]   = useState(false);
+  
+  const logout = useAuthStore((s) => s.logout);
+  const router = useRouter();
+
+  // Theme is visual-only for now; dark mode implementation later
+  const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark'>('light');
 
   async function handleSave(e: React.SyntheticEvent) {
     e.preventDefault();
     setSaving(true);
     setSuccess('');
     setError('');
-
     try {
-      const payload: any = { name, email };
-      
+      const payload: Record<string, string> = { name, email };
       if (password) {
-        if (password !== passwordConfirmation) {
-          setError('Passwords do not match');
-          setSaving(false);
-          return;
-        }
+        if (password !== pwConf) { setError('Passwords do not match'); setSaving(false); return; }
         payload.password = password;
-        payload.password_confirmation = passwordConfirmation;
+        payload.password_confirmation = pwConf;
       }
-
       const res = await api.patch('/auth/me', payload);
-      setUser(res.data); // Update context with new user info
-      setSuccess('Profile updated successfully!');
+      setUser(res.data);
+      setSuccess('Preferences saved.');
       setPassword('');
-      setPasswordConfirmation('');
+      setPwConf('');
     } catch (err: any) {
-      console.error('Failed to update profile', err);
-      setError(err.response?.data?.message || 'Failed to update profile');
+      setError(err.response?.data?.message || 'Failed to save.');
     } finally {
       setSaving(false);
     }
   }
 
+  async function handleDeleteAccount() {
+    setConfirmDelete(false);
+    setDeletingAcc(true);
+    setError('');
+    try {
+      await api.delete('/auth/me');
+      logout(() => {
+        router.push('/login');
+      });
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to delete account.');
+      setDeletingAcc(false);
+    }
+  }
+
+  const hasChanges = name !== (user?.name || '') || email !== (user?.email || '') || password !== '' || pwConf !== '';
+
   return (
-    <AppLayout title="Settings">
-      <div className="max-w-2xl mx-auto space-y-8">
-        
-        {/* Settings Form */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-          <form onSubmit={handleSave} className="space-y-6">
-            
-            {/* Profile Section */}
-            <div>
-              <h2 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
-                <UserIcon size={18} className="text-zinc-400" />
-                Profile Information
-              </h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">Name</label>
-                  <input 
-                    type="text" 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">Email</label>
-                  <input 
-                    type="email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                  />
-                </div>
+    <AppLayout>
+      <div className="px-8 md:px-12 xl:px-16 py-8">
+        <h1
+          className="text-3xl font-semibold mb-2"
+          style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
+        >
+          Settings
+        </h1>
+        <p className="text-sm mb-4 font-inter" style={{ color: 'var(--on-surface-dim)' }}>Personalize your digital vellum.</p>
+
+        <form onSubmit={handleSave}>
+
+          <Row label="Profile" description="Personalize how you appear in your digital vellum.">
+            <div className="space-y-4">
+              <div>
+                <label className="label-caps block mb-1.5 font-inter" style={{ color: 'var(--on-surface-dim)' }}>Full Name</label>
+                <input
+                  type="text" value={name} onChange={e => setName(e.target.value)} required
+                  className="vellum-input"
+                />
+              </div>
+              <div>
+                <label className="label-caps block mb-1.5 font-inter" style={{ color: 'var(--on-surface-dim)' }}>Email Address</label>
+                <input
+                  type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                  className="vellum-input"
+                />
               </div>
             </div>
+          </Row>
 
-            <hr className="border-zinc-800" />
-
-            {/* Password Section */}
-            <div>
-              <h2 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
-                <Lock size={18} className="text-zinc-400" />
-                Change Password (Optional)
-              </h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">New Password</label>
-                  <input 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Leave blank to keep current password"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">Confirm New Password</label>
-                  <input 
-                    type="password" 
-                    value={passwordConfirmation}
-                    onChange={(e) => setPasswordConfirmation(e.target.value)}
-                    placeholder="Confirm your new password"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                  />
-                </div>
+          <Row label="Account" description="Manage your credentials and security access.">
+            <div
+              className="flex items-center justify-between rounded-xl px-5 py-4"
+              style={{ background: 'var(--surface-container-low)' }}
+            >
+              <div>
+                <p className="text-sm font-medium font-inter" style={{ color: 'var(--on-surface)'}}>Password</p>
+                <p className="text-xs mt-0.5 font-inter" style={{ color: 'var(--on-surface-dim)' }}>Leave blank to keep current password</p>
               </div>
-            </div>
-
-            {/* Status Messages */}
-            {success && (
-              <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-sm font-medium">
-                {success}
-              </div>
-            )}
-            
-            {error && (
-              <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-sm font-medium">
-                {error}
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex justify-end pt-2">
-              <button 
-                type="submit"
-                disabled={saving}
-                className="flex items-center gap-2 bg-white text-zinc-950 px-6 py-3 rounded-xl text-sm font-medium hover:bg-zinc-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('pw-section');
+                  if (el) el.classList.toggle('hidden');
+                }}
+                className="label-caps px-3 py-1.5 rounded-lg transition-colors font-inter hover:bg-black/5 dark:hover:bg-white/5"
+                style={{ color: 'var(--primary)' }}
               >
-                {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                {saving ? 'Saving...' : 'Save Changes'}
+                Update
               </button>
             </div>
+            <div id="pw-section" className="hidden mt-4 space-y-3">
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="New password" className="vellum-input" />
+              <input type="password" value={pwConf}   onChange={e => setPwConf(e.target.value)}   placeholder="Confirm new password" className="vellum-input" />
+            </div>
+          </Row>
 
-          </form>
+          <Row label="Theme Preferences" description="Choose the visual aesthetic for your digital writing space.">
+            <div className="flex gap-4">
+              {(['light', 'dark'] as const).map(mode => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setSelectedTheme(mode)}
+                  className="flex-1 rounded-2xl overflow-hidden border-2 transition-colors hover:border-[var(--primary)]"
+                  style={{
+                    borderColor: selectedTheme === mode ? 'var(--primary)' : 'var(--outline-variant)',
+                  }}
+                >
+                  <div
+                    className="h-20 flex items-center justify-center"
+                    style={{ background: mode === 'light' ? '#f5f3ee' : '#0d0f0d' }}
+                  >
+                    <div className="w-12 h-1.5 rounded-full opacity-40" style={{ background: mode === 'light' ? '#3d6645' : '#a7d1a5' }} />
+                  </div>
+                  <div
+                    className="py-2 text-center label-caps font-inter"
+                    style={{
+                      background: mode === 'light' ? '#edeae3' : '#1c211d',
+                      color: mode === 'light' ? '#4a4845' : '#a7ada5',
+                    }}
+                  >
+                    {mode === 'light' ? 'Light Mode' : 'Dark Mode'}
+                  </div>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs mt-3 italic" style={{ color: 'var(--on-surface-dim)' }}>
+              Dark mode coming soon. Theme selection is saved but not yet applied.
+            </p>
+          </Row>
+
+          {(success || error) && (
+            <div
+              className="my-4 px-4 py-3 rounded-xl text-sm font-inter"
+              style={{
+                background: success ? 'var(--primary-container)' : '#fce4e4',
+                color: success ? 'var(--primary)' : 'var(--error)',
+              }}
+            >
+              {success || error}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-4 py-8">
+            <button
+              type="button"
+              disabled={!hasChanges}
+              onClick={() => { setName(user?.name || ''); setEmail(user?.email || ''); setPassword(''); setPwConf(''); setSuccess(''); setError(''); }}
+              className="label-caps transition font-inter border px-4 py-2 rounded-lg hover:bg-[var(--surface-container-high)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              style={{ color: 'var(--on-surface-dim)', borderColor: hasChanges ? 'var(--outline-variant)' : 'transparent' }}
+            >
+              Discard changes
+            </button>
+            <button type="submit" disabled={saving || !hasChanges} className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
+              {saving ? <Loader2 size={14} className="animate-spin" /> : null}
+              Save Preferences
+            </button>
+          </div>
+        </form>
+
+        <div
+          className="rounded-2xl p-6 mt-4 font-inter border-2 transition-all hover:border-[var(--error)]"
+          style={{ background: '#fce4e4', borderColor: '#f2b8b5' }}
+        >
+          <p className="label-caps mb-1 " style={{ color: 'var(--error)' }}>Danger Zone</p>
+          <p className="text-sm mb-4 leading-relaxed" style={{ color: '#7a2020' }}>
+            Once you delete your account, there is no going back. All entries will be purged from our servers forever.
+          </p>
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(true)}
+            disabled={deletingAcc}
+            className="flex items-center gap-2 label-caps px-4 py-2 rounded-full border-2 transition bg-transparent text-[var(--error)] hover:bg-[var(--error)] hover:text-white disabled:opacity-50"
+            style={{ borderColor: 'var(--error)' }}
+          >
+            {deletingAcc && <Loader2 size={14} className="animate-spin" />}
+            Delete microjournal account
+          </button>
         </div>
-
       </div>
+
+      {/* ── Confirm Delete Account Modal ────────────────────────────────────── */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 backdrop-blur-sm"
+            style={{ background: 'rgba(0,0,0,0.35)' }}
+            onClick={() => setConfirmDelete(false)}
+          />
+          <div
+            className="relative rounded-2xl p-7 shadow-2xl w-full max-w-sm animate-in"
+            style={{ background: 'var(--surface-container)' }}
+          >
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--error)', fontFamily: "'Noto Serif', serif" }}>
+              Final Warning
+            </h3>
+            <p className="text-sm mb-6" style={{ color: 'var(--on-surface-variant)' }}>
+              Are you absolutely sure? This will permanently delete your account, your settings, and all of your journal entries. This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-4 py-2 rounded-full text-sm transition hover:opacity-80"
+                style={{ color: 'var(--on-surface-variant)', background: 'var(--surface-container-high)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition hover:opacity-80"
+                style={{ background: 'var(--error)', color: '#fff' }}
+              >
+                Delete My Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }

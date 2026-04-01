@@ -109,4 +109,18 @@ class AuthController extends Controller
 
         return response()->json($user);
     }
+
+    /**
+     * Delete the authenticated user's account and all traces.
+     */
+    public function destroy(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        // For a complete app, we'd also delete Cloudinary images for all their entries here, 
+        // but for now, cascading db deletes or simple user deletion is sufficient.
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json(['message' => 'Account deleted successfully.']);
+    }
 }

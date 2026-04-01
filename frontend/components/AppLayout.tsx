@@ -1,195 +1,150 @@
+'use client';
+
 import { useAuthStore } from '@/store/authStore';
-import { LogOut, LayoutDashboard, Calendar, TrendingUp, Settings, Trash2 } from 'lucide-react';
+import { BookOpen, Calendar, BarChart2, Settings, Trash2, LogOut, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/lib/api';
-
-const MOOD_EMOJIS: Record<string, string> = {
-  excellent: '🤩',
-  good: '🙂',
-  okay: '😐',
-  bad: '😔',
-  terrible: '😫',
-};
 
 interface AppLayoutProps {
   children: ReactNode;
-  title?: string;
-  headerActions?: ReactNode;
 }
 
-export default function AppLayout({ children, title, headerActions }: AppLayoutProps) {
+const NAV_ITEMS = [
+  { label: 'Journal',   href: '/',          icon: BookOpen },
+  { label: 'Calendar',  href: '/calendar',   icon: Calendar },
+  { label: 'Insights',  href: '/insights',   icon: BarChart2 },
+  { label: 'Trash',     href: '/trash',      icon: Trash2 },
+];
+
+export default function AppLayout({ children }: AppLayoutProps) {
   const logout = useAuthStore((s) => s.logout);
   const router = useRouter();
   const pathname = usePathname();
 
-  const navItems = [
-    { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { label: 'Calendar', href: '/calendar', icon: Calendar },
-    { label: 'Insights', href: '/insights', icon: TrendingUp },
-    { label: 'Settings', href: '/settings', icon: Settings },
-    { label: 'Trash', href: '/trash', icon: Trash2 },
-  ];
-
-  const [miniInsights, setMiniInsights] = useState<{
-    streak: number;
-    total_entries: number;
-    most_common_mood: string | null;
-  } | null>(null);
-  const [loadingMini, setLoadingMini] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchMiniInsights() {
-      try {
-        const res = await api.get('/insights', { params: { period: 'all_time' } });
-        if (isMounted) {
-          const data = res.data;
-          
-          let topMood = null;
-          let maxCount = 0;
-          if (data.mood_distribution) {
-             Object.entries(data.mood_distribution).forEach(([mood, count]) => {
-                if ((count as number) > maxCount) {
-                   maxCount = count as number;
-                   topMood = mood;
-                }
-             });
-          }
-          
-          setMiniInsights({
-            streak: data.streak || 0,
-            total_entries: data.total_entries || 0,
-            most_common_mood: topMood,
-          });
-        }
-      } catch (err) {
-        console.error('Failed to fetch mini insights', err);
-      } finally {
-        if (isMounted) setLoadingMini(false);
-      }
-    }
-    fetchMiniInsights();
-    return () => { isMounted = false; };
-  }, []);
-
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col md:flex-row">
-      
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-zinc-800 bg-zinc-950 p-6 sticky top-0 h-screen">
-        <div className="flex items-center gap-3 mb-12">
-          <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center font-bold text-white shadow shadow-blue-500/20">
-            M
-          </div>
-          <h1 className="text-xl font-bold tracking-tight">microjournal</h1>
+    <div
+      className="min-h-screen flex"
+      style={{ background: 'var(--surface)' }}
+    >
+      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
+      <aside
+        className="hidden md:flex flex-col w-56 shrink-0 sticky top-0 h-screen py-7 px-5"
+        style={{ background: 'var(--surface-container-low)' }}
+      >
+        {/* Wordmark */}
+        <div className="mb-10">
+          <p
+            className="text-base font-semibold italic tracking-tight leading-none"
+            style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
+          >
+            microjournal
+          </p>
+          <p
+            className="label-caps mt-1"
+            style={{ color: 'var(--on-surface-dim)' }}
+          >
+            The Digital Vellum
+          </p>
         </div>
 
-        {/* Mini Insights Widget */}
-        {(loadingMini || (miniInsights && miniInsights.total_entries > 0)) && (
-          <div className="mb-6 px-1">
-            <h3 className="text-sm font-medium text-zinc-300 mb-2">Insights</h3>
-            {loadingMini ? (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-4 shadow-sm animate-pulse">
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-zinc-800 rounded-full" />
-                  <div className="w-24 h-4 bg-zinc-800 rounded" />
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-zinc-800 rounded-full" />
-                  <div className="w-16 h-4 bg-zinc-800 rounded" />
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-zinc-800 rounded-full" />
-                  <div className="w-28 h-4 bg-zinc-800 rounded" />
-                </div>
-              </div>
-            ) : miniInsights && (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-4 shadow-sm">
-                <div className="flex items-center gap-3 text-sm text-zinc-100 font-medium">
-                  <span className="text-xl">🔥</span> 
-                  <span>{miniInsights.streak}-day streak</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-zinc-100 font-medium">
-                  <span className="text-xl">📖</span> 
-                  <span>{miniInsights.total_entries} {miniInsights.total_entries === 1 ? 'entry' : 'entries'}</span>
-                </div>
-                {miniInsights.most_common_mood && (
-                  <div className="flex items-center gap-3 text-sm text-zinc-100 font-medium">
-                    <span className="text-xl">{MOOD_EMOJIS[miniInsights.most_common_mood] || '😐'}</span> 
-                    <span className="capitalize">Most common mood</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        <nav className="flex-1 space-y-2">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
+        {/* Navigation */}
+        <nav className="flex flex-col gap-0.5 flex-1">
+          {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
+            const isActive = pathname === href;
             return (
-              <Link 
-                key={item.href} 
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
-                  isActive 
-                  ? 'bg-zinc-800 text-white font-medium shadow-sm border border-zinc-700' 
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent'
-                }`}
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors hover:bg-[var(--surface-variant)]"
+                style={{
+                  background: isActive ? 'var(--surface-container-high)' : undefined,
+                  color: isActive ? 'var(--on-surface)' : 'var(--on-surface-dim)',
+                }}
               >
-                <item.icon size={20} className={isActive ? 'text-blue-500' : ''} />
-                {item.label}
+                <Icon
+                  size={16}
+                  style={{ color: isActive ? 'var(--primary)' : 'var(--on-surface-dim)' }}
+                />
+                <span
+                  style={{
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontSize: '0.875rem', /* 14px */
+                    fontWeight: isActive ? 600 : 400,
+                    letterSpacing: '0.01em',
+                    color: isActive ? 'var(--on-surface)' : 'var(--on-surface-dim)',
+                  }}
+                >
+                  {label}
+                </span>
               </Link>
             );
           })}
         </nav>
 
-        <button 
-          onClick={() => logout(() => router.push('/login'))}
-          className="flex items-center gap-3 px-4 py-3 mt-auto rounded-xl text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition"
-        >
-          <LogOut size={20} />
-          Logout
-        </button>
+        {/* Bottom actions */}
+        <div className="space-y-2 mt-auto">
+          {/* Settings link */}
+          <Link
+            href="/settings"
+            className="flex items-center gap-3 px-3 py-2 rounded-xl transition-colors hover:bg-[var(--surface-variant)]"
+            style={{
+              background: pathname === '/settings' ? 'var(--surface-container-high)' : undefined,
+              color: pathname === '/settings' ? 'var(--on-surface)' : 'var(--on-surface-dim)',
+            }}
+          >
+            <Settings size={14} style={{ color: pathname === '/settings' ? 'var(--primary)' : 'var(--on-surface-dim)' }} />
+            <span
+              style={{
+                fontFamily: "'Inter', system-ui, sans-serif",
+                fontSize: '0.875rem', /* 14px */
+                fontWeight: pathname === '/settings' ? 600 : 400,
+                letterSpacing: '0.01em',
+                color: pathname === '/settings' ? 'var(--on-surface)' : 'var(--on-surface-dim)',
+              }}
+            >Settings</span>
+          </Link>
+
+         
+         
+        </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-h-screen pb-20 md:pb-0 overflow-x-hidden relative">
-        {(title || headerActions) && (
-          <header className="sticky top-0 z-10 flex items-center justify-between px-6 py-5 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800">
-            <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h1>
-            <div className="flex items-center gap-3">
-              {headerActions}
-            </div>
-          </header>
-        )}
-        <div className="p-4 md:p-8 flex-1 max-w-4xl w-full mx-auto">
-          {children}
-        </div>
+      {/* ── Main Content ─────────────────────────────────────────────────── */}
+      <main className="flex-1 min-h-screen overflow-x-hidden">
+        {children}
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-xl border-t border-zinc-800 pb-safe">
-        <div className="flex justify-around items-center h-16 px-6">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link 
-                key={item.href} 
-                href={item.href}
-                className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition ${
-                  isActive ? 'text-blue-500' : 'text-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                <item.icon size={20} className={isActive ? 'opacity-100' : 'opacity-80'} />
-                <span className="text-[10px] font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
+      {/* ── Mobile Bottom Nav ────────────────────────────────────────────── */}
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center h-14 px-2"
+        style={{ background: 'var(--surface-container-low)', borderTop: '1px solid var(--outline-variant)' }}
+      >
+        {[...NAV_ITEMS, { label: 'Settings', href: '/settings', icon: Settings }].map(({ label, href, icon: Icon }) => {
+          const isActive = pathname === href;
+          return (
+            <Link
+              key={href}
+              href={href}
+              className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2"
+              style={{ color: isActive ? 'var(--primary)' : 'var(--on-surface-dim)' }}
+            >
+              <Icon size={18} />
+              <span className="label-caps" style={{ fontSize: '0.5rem' }}>{label}</span>
+            </Link>
+          );
+        })}
+
+        {/* Logout on mobile */}
+        <button
+          onClick={() => logout(() => router.push('/login'))}
+          className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2"
+          style={{ color: 'var(--on-surface-dim)' }}
+        >
+          <LogOut size={18} />
+          <span className="label-caps" style={{ fontSize: '0.5rem' }}>Logout</span>
+        </button>
       </nav>
 
     </div>

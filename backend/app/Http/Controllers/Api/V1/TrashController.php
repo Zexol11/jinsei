@@ -79,10 +79,39 @@ class TrashController extends Controller
             $this->deleteCloudinaryImages($publicIds);
         }
 
-        // 2. Permanently delete the entry
         $entry->forceDelete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Permanently delete ALL soft-deleted entries to empty the trash.
+     */
+    public function empty(Request $request): JsonResponse
+    {
+        $entries = JournalEntry::onlyTrashed()
+            ->where('user_id', $request->user()->id)
+            ->get();
+
+        foreach ($entries as $entry) {
+            $content = $entry->content;
+            if (str_contains($content, 'data-public-id')) {
+                $dom = new \DOMDocument();
+                @$dom->loadHTML('<?xml encoding="utf-8" ?>' . $content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+                $images = $dom->getElementsByTagName('img');
+                
+                $publicIds = [];
+                foreach ($images as $img) {
+                    if ($img instanceof \DOMElement && $img->hasAttribute('data-public-id')) {
+                        $publicIds[] = $img->getAttribute('data-public-id');
+                    }
+                }
+                $this->deleteCloudinaryImages($publicIds);
+            }
+            $entry->forceDelete();
+        }
+
+        return response()->json(['message' => 'Trash emptied successfully.']);
     }
 
     /**

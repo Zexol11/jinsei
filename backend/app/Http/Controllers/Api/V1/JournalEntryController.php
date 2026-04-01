@@ -65,6 +65,7 @@ class JournalEntryController extends Controller
         $data = $request->validate([
             'mood_id'          => ['required', 'exists:moods,id'],
             'entry_date'       => ['required', 'date', 'before_or_equal:today'],
+            'title'            => ['sometimes', 'nullable', 'string', 'max:255'],
             'content'          => ['required', 'string'],
             'tag_ids'          => ['sometimes', 'array'],
             'tag_ids.*'        => ['integer', 'exists:tags,id'],
@@ -85,6 +86,7 @@ class JournalEntryController extends Controller
         $entry = $request->user()->journalEntries()->create([
             'mood_id'    => $data['mood_id'],
             'entry_date' => $date,
+            'title'      => $data['title'] ?? null,
             'content'    => $data['content'],
         ]);
 
@@ -122,6 +124,7 @@ class JournalEntryController extends Controller
 
         $data = $request->validate([
             'mood_id'            => ['sometimes', 'exists:moods,id'],
+            'title'              => ['sometimes', 'nullable', 'string', 'max:255'],
             'content'            => ['sometimes', 'string'],
             'tag_ids'            => ['sometimes', 'array'],
             'tag_ids.*'          => ['integer', 'exists:tags,id'],
@@ -131,6 +134,7 @@ class JournalEntryController extends Controller
 
         $entry->update(array_filter([
             'mood_id' => $data['mood_id'] ?? null,
+            'title'   => array_key_exists('title', $data) ? $data['title'] : $entry->title,
             'content' => $data['content'] ?? null,
         ], fn ($v) => $v !== null));
 

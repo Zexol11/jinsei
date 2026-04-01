@@ -24,6 +24,7 @@ Route::prefix('v1')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',      [AuthController::class, 'me']);
             Route::patch('me',    [AuthController::class, 'update']);
+            Route::delete('me',   [AuthController::class, 'destroy']);
         });
         
         // Journal Entries
@@ -44,6 +45,7 @@ Route::prefix('v1')->group(function () {
 
         // Trash (soft-deleted entries)
         Route::get('trash', [App\Http\Controllers\Api\V1\TrashController::class, 'index']);
+        Route::delete('trash', [App\Http\Controllers\Api\V1\TrashController::class, 'empty']);
         Route::post('trash/{date}/restore', [App\Http\Controllers\Api\V1\TrashController::class, 'restore']);
         Route::delete('trash/{date}', [App\Http\Controllers\Api\V1\TrashController::class, 'forceDestroy']);
 
