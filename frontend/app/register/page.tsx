@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/authStore';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
   const user     = useAuthStore((s) => s.user);
@@ -17,6 +18,8 @@ export default function RegisterPage() {
   const [pwConf,   setPwConf]   = useState('');
   const [errors,   setErrors]   = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPwConf,   setShowPwConf]   = useState(false);
 
   useEffect(() => { if (!loading && user) router.replace('/'); }, [user, loading, router]);
 
@@ -60,7 +63,7 @@ export default function RegisterPage() {
         </h1>
         <p className="text-sm mb-6" style={{ color: 'var(--on-surface-dim)' }}>Create your account to start writing.</p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 font-inter">
           <div>
             <label className="label-caps block mb-1.5" htmlFor="name" style={{ color: 'var(--on-surface-dim)' }}>Full Name</label>
             <input id="name" type="text" autoComplete="name" required value={name} onChange={e => setName(e.target.value)} className="vellum-input" placeholder="Your name" />
@@ -73,12 +76,40 @@ export default function RegisterPage() {
           </div>
           <div>
             <label className="label-caps block mb-1.5" htmlFor="password" style={{ color: 'var(--on-surface-dim)' }}>Password</label>
-            <input id="password" type="password" autoComplete="new-password" required value={password} onChange={e => setPassword(e.target.value)} className="vellum-input" placeholder="Min. 8 characters" />
+            <div className="relative">
+              <input
+                id="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" required
+                value={password} onChange={e => setPassword(e.target.value)}
+                className="vellum-input pr-10" placeholder="Min. 8 characters"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                style={{ color: 'var(--on-surface-dim)' }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
             {fe('password') && <p className="text-xs mt-1" style={{ color: 'var(--error)' }}>{fe('password')}</p>}
           </div>
           <div>
             <label className="label-caps block mb-1.5" htmlFor="password_confirmation" style={{ color: 'var(--on-surface-dim)' }}>Confirm Password</label>
-            <input id="password_confirmation" type="password" autoComplete="new-password" required value={pwConf} onChange={e => setPwConf(e.target.value)} className="vellum-input" placeholder="Repeat password" />
+            <div className="relative">
+              <input
+                id="password_confirmation" type={showPwConf ? 'text' : 'password'} autoComplete="new-password" required
+                value={pwConf} onChange={e => setPwConf(e.target.value)}
+                className="vellum-input pr-10" placeholder="Repeat password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwConf(!showPwConf)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                style={{ color: 'var(--on-surface-dim)' }}
+              >
+                {showPwConf ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
           <button type="submit" disabled={submitting} className="btn-primary w-full mt-2">
             {submitting ? 'Creating account…' : 'Create account'}

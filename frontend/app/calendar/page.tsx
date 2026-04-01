@@ -66,7 +66,7 @@ function CalendarPage() {
       <div className="flex min-h-screen">
 
         {/* ── Main calendar area ──────────────────────────────────────── */}
-        <div className="flex-1 px-8 md:px-20 lg:px-32 xl:px-40 py-12 min-w-0">
+        <div className="flex-1 px-4 md:px-10 lg:px-20 py-8 md:py-12 min-w-0">
 
           {/* Month nav */}
           <div className="flex items-center gap-5 mb-10">
@@ -74,7 +74,7 @@ function CalendarPage() {
               <ChevronLeft size={18} />
             </button>
             <h1
-              className="text-4xl font-semibold"
+              className="text-2xl md:text-4xl font-semibold"
               style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
             >
               {format(currentDate, 'MMMM yyyy')}

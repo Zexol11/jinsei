@@ -34,7 +34,7 @@
 }
 
 /* ─── Dark Mode Tokens (Midnight Forest) ────────────────────────────────────── */
-[data-theme="dark"] {
+:root.dark {
   --surface:                   #0d0f0d;
   --surface-container-lowest:  #000000;
   --surface-container-low:     #111411;
@@ -117,12 +117,15 @@ body {
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   color: var(--on-surface);
-  font-family: 'Noto Serif', serif;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.9375rem;
   transition: border-color 0.15s;
   outline: none;
 }
-.vellum-input::placeholder { color: var(--on-surface-dim); }
+.vellum-input::placeholder { 
+  color: var(--on-surface-dim); 
+  font-family: 'Inter', system-ui, sans-serif;
+}
 .vellum-input:focus { border-color: var(--primary); }
 
 /* ─── Ghost Border Utility ──────────────────────────────────────────────────── */
@@ -166,3 +169,13 @@ body {
 @keyframes fade-in   { from { opacity: 0; } to { opacity: 1; } }
 @keyframes zoom-in   { from { transform: scale(0.96); } to { transform: scale(1); } }
 .animate-in { animation: fade-in 0.2s ease, zoom-in 0.2s ease; }
+
+/* ─── Utilities ───────────────────────────────────────────────────────────── */
+@layer utilities {
+  .vellum-error-box {
+    @apply mb-5 px-4 py-3 rounded-xl text-sm transition-colors;
+    background: color-mix(in srgb, var(--error) 10%, transparent);
+    color: var(--error);
+    border: 1px solid color-mix(in srgb, var(--error) 20%, transparent);
+  }
+}

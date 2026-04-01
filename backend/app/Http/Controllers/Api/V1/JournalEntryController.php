@@ -69,6 +69,8 @@ class JournalEntryController extends Controller
             'content'          => ['required', 'string'],
             'tag_ids'          => ['sometimes', 'array'],
             'tag_ids.*'        => ['integer', 'exists:tags,id'],
+            'cover_image_url'  => ['sometimes', 'nullable', 'url', 'max:2048'],
+            'cover_image_caption' => ['sometimes', 'nullable', 'string', 'max:255'],
             'images_to_delete' => ['sometimes', 'array'],
             'images_to_delete.*' => ['string'],
         ]);
@@ -88,6 +90,8 @@ class JournalEntryController extends Controller
             'entry_date' => $date,
             'title'      => $data['title'] ?? null,
             'content'    => $data['content'],
+            'cover_image_url' => $data['cover_image_url'] ?? null,
+            'cover_image_caption' => $data['cover_image_caption'] ?? null,
         ]);
 
         // Sync tags if provided (validates they belong to this user)
@@ -128,6 +132,8 @@ class JournalEntryController extends Controller
             'content'            => ['sometimes', 'string'],
             'tag_ids'            => ['sometimes', 'array'],
             'tag_ids.*'          => ['integer', 'exists:tags,id'],
+            'cover_image_url'    => ['sometimes', 'nullable', 'url', 'max:2048'],
+            'cover_image_caption' => ['sometimes', 'nullable', 'string', 'max:255'],
             'images_to_delete'   => ['sometimes', 'array'],
             'images_to_delete.*' => ['string'],
         ]);
@@ -136,6 +142,8 @@ class JournalEntryController extends Controller
             'mood_id' => $data['mood_id'] ?? null,
             'title'   => array_key_exists('title', $data) ? $data['title'] : $entry->title,
             'content' => $data['content'] ?? null,
+            'cover_image_url' => array_key_exists('cover_image_url', $data) ? $data['cover_image_url'] : $entry->cover_image_url,
+            'cover_image_caption' => array_key_exists('cover_image_caption', $data) ? $data['cover_image_caption'] : $entry->cover_image_caption,
         ], fn ($v) => $v !== null));
 
         if (array_key_exists('tag_ids', $data)) {

@@ -10,6 +10,7 @@ import { Loader2, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AppLayout from '@/components/AppLayout';
+import CoverImageUpload from '@/components/CoverImageUpload';
 
 // ── word count helper ──────────────────────────
 function countWords(html: string) {
@@ -41,6 +42,9 @@ function EntryPage() {
   const [showDelete, setShowDelete] = useState(false);
   const [error,      setError]      = useState('');
 
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [coverImageCaption, setCoverImageCaption] = useState('');
+
   // Draft state
   const [draftSavedAt,   setDraftSavedAt]   = useState<string | null>(null);
   const [isDraftDirty,   setIsDraftDirty]   = useState(false);
@@ -68,6 +72,8 @@ function EntryPage() {
           setContent(entryRes.data.content);
           setSelectedMoodId(entryRes.data.mood.id);
           setSelectedTags(entryRes.data.tags ?? []);
+          setCoverImageUrl(entryRes.data.cover_image_url ?? null);
+          setCoverImageCaption(entryRes.data.cover_image_caption ?? '');
         } else {
           // Check for a local draft
           const draft = localStorage.getItem(`draft-${dateStr}`);
@@ -76,6 +82,8 @@ function EntryPage() {
             setTitle(parsed.title || '');
             setContent(parsed.content || '');
             if (parsed.moodId) setSelectedMoodId(parsed.moodId);
+            if (parsed.coverImageUrl) setCoverImageUrl(parsed.coverImageUrl);
+            if (parsed.coverImageCaption) setCoverImageCaption(parsed.coverImageCaption);
             setDraftSavedAt(parsed.savedAt || null);
           } else {
             const neutral = moodsRes.data.find((m: Mood) => m.value === 3) || moodsRes.data[0];
@@ -100,16 +108,16 @@ function EntryPage() {
     autoSaveRef.current = setTimeout(() => {
       const now = fmtTime(new Date());
       localStorage.setItem(`draft-${dateStr}`, JSON.stringify({
-        title, content, moodId: selectedMoodId, savedAt: now,
+        title, content, moodId: selectedMoodId, coverImageUrl, coverImageCaption, savedAt: now,
       }));
       setDraftSavedAt(now);
       setIsDraftDirty(false);
     }, 30_000);
-  }, [dateStr, title, content, selectedMoodId, isExisting]);
+  }, [dateStr, title, content, selectedMoodId, coverImageUrl, coverImageCaption, isExisting]);
 
   useEffect(() => {
-    if (!loading && !isExisting && (title || content)) scheduleDraft();
-  }, [title, content, selectedMoodId]); // eslint-disable-line
+    if (!loading && !isExisting && (title || content || coverImageUrl)) scheduleDraft();
+  }, [title, content, selectedMoodId, coverImageUrl, coverImageCaption]); // eslint-disable-line
 
   // ── Resolve tags ───────────────────────────────────────────────────────────
   async function resolveTagIds(): Promise<number[]> {
@@ -134,16 +142,23 @@ function EntryPage() {
     try {
       const tagIds       = await resolveTagIds();
       const currentIds   = extractPublicIds(content);
+      if (coverImageUrl) currentIds.push(...extractPublicIds(coverImageUrl));
       const imagesToDel  = trackedIds.filter(id => !currentIds.includes(id));
 
+      const payload = {
+        mood_id: selectedMoodId, 
+        title, 
+        content, 
+        tag_ids: tagIds, 
+        cover_image_url: coverImageUrl,
+        cover_image_caption: coverImageCaption,
+        images_to_delete: imagesToDel,
+      };
+
       if (isExisting) {
-        await api.patch(`/entries/${dateStr}`, {
-          mood_id: selectedMoodId, title, content, tag_ids: tagIds, images_to_delete: imagesToDel,
-        });
+        await api.patch(`/entries/${dateStr}`, payload);
       } else {
-        await api.post('/entries', {
-          entry_date: dateStr, mood_id: selectedMoodId, title, content, tag_ids: tagIds, images_to_delete: imagesToDel,
-        });
+        await api.post('/entries', { entry_date: dateStr, ...payload });
         // Clear draft on successful save
         localStorage.removeItem(`draft-${dateStr}`);
         setIsExisting(true);
@@ -216,29 +231,46 @@ function EntryPage() {
         <div className="flex-1 px-8 md:px-14 pt-8 pb-28">
 
           {error && (
-            <div className="mb-6 px-4 py-3 rounded-xl text-sm" style={{ background: '#fce4e4', color: 'var(--error)' }}>
+            <div className="vellum-error-box mb-6">
               {error}
             </div>
           )}
 
-          {/* Mood selector */}
-          <MoodSelector moods={moods} selectedMoodId={selectedMoodId} onSelect={setSelectedMoodId} />
+          {/* Header Layout */}
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-8 mb-6">
+            <div className="flex-1 min-w-0 pt-4">
+              {/* Mood selector */}
+              <MoodSelector moods={moods} selectedMoodId={selectedMoodId} onSelect={setSelectedMoodId} />
 
-          {/* Title */}
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title of your entry…"
-            className="w-full bg-transparent outline-none mt-8 mb-6 pb-3 transition-colors border-b border-transparent focus:border-[color:var(--outline-variant)]"
-            style={{
-              fontFamily: "'Noto Serif', serif",
-              fontSize: '2rem',
-              fontWeight: 600,
-              color: 'var(--on-surface)',
-              lineHeight: 1.2,
-            }}
-          />
+              {/* Title */}
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Title of your entry…"
+                className="w-full bg-transparent outline-none mt-8 pb-3 transition-colors border-b border-transparent focus:border-[color:var(--outline-variant)]"
+                style={{
+                  fontFamily: "'Noto Serif', serif",
+                  fontSize: '2rem',
+                  fontWeight: 600,
+                  color: 'var(--on-surface)',
+                  lineHeight: 1.2,
+                }}
+              />
+            </div>
+            
+            <div className="lg:shrink-0">
+              <CoverImageUpload
+                imageUrl={coverImageUrl}
+                caption={coverImageCaption}
+                onImageChange={(url) => {
+                  setCoverImageUrl(url);
+                  if (url) setTrackedIds(prev => [...prev, ...extractPublicIds(url)]);
+                }}
+                onCaptionChange={setCoverImageCaption}
+              />
+            </div>
+          </div>
 
           {/* Editor */}
           <JournalEditor

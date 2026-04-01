@@ -3,10 +3,11 @@
 import withAuth from '@/components/withAuth';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
+import { useTheme } from 'next-themes';
 
 const Row = ({ label, description, children }: { label: string; description?: string; children: React.ReactNode }) => (
   <div className="flex flex-col md:flex-row md:gap-16 py-10" style={{ borderBottom: '1px solid var(--outline-variant)' }}>
@@ -32,12 +33,13 @@ function SettingsPage() {
   
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deletingAcc,   setDeletingAcc]   = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPwConf,   setShowPwConf]   = useState(false);
   
   const logout = useAuthStore((s) => s.logout);
   const router = useRouter();
 
-  // Theme is visual-only for now; dark mode implementation later
-  const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark'>('light');
+  const { theme, setTheme } = useTheme();
 
   async function handleSave(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -134,8 +136,38 @@ function SettingsPage() {
               </button>
             </div>
             <div id="pw-section" className="hidden mt-4 space-y-3">
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="New password" className="vellum-input" />
-              <input type="password" value={pwConf}   onChange={e => setPwConf(e.target.value)}   placeholder="Confirm new password" className="vellum-input" />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password} onChange={e => setPassword(e.target.value)}
+                  placeholder="New password"
+                  className="vellum-input pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                  style={{ color: 'var(--on-surface-dim)' }}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  type={showPwConf ? 'text' : 'password'}
+                  value={pwConf} onChange={e => setPwConf(e.target.value)}
+                  placeholder="Confirm new password"
+                  className="vellum-input pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwConf(!showPwConf)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                  style={{ color: 'var(--on-surface-dim)' }}
+                >
+                  {showPwConf ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
           </Row>
 
@@ -145,10 +177,10 @@ function SettingsPage() {
                 <button
                   key={mode}
                   type="button"
-                  onClick={() => setSelectedTheme(mode)}
+                  onClick={() => setTheme(mode)}
                   className="flex-1 rounded-2xl overflow-hidden border-2 transition-colors hover:border-[var(--primary)]"
                   style={{
-                    borderColor: selectedTheme === mode ? 'var(--primary)' : 'var(--outline-variant)',
+                    borderColor: theme === mode ? 'var(--primary)' : 'var(--outline-variant)',
                   }}
                 >
                   <div
@@ -169,9 +201,6 @@ function SettingsPage() {
                 </button>
               ))}
             </div>
-            <p className="text-xs mt-3 italic" style={{ color: 'var(--on-surface-dim)' }}>
-              Dark mode coming soon. Theme selection is saved but not yet applied.
-            </p>
           </Row>
 
           {(success || error) && (
@@ -203,11 +232,23 @@ function SettingsPage() {
           </div>
         </form>
 
+        <Row label="Session" description="Manage your current active session on this device.">
+          <div className="flex justify-end">
+            <button
+              onClick={() => logout(() => router.push('/login'))}
+              className="flex items-center gap-2 label-caps px-5 py-2.5 rounded-xl border-2 transition hover:bg-[var(--surface-container-high)]"
+              style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
+            >
+              Sign Out
+            </button>
+          </div>
+        </Row>
+
         <div
-          className="rounded-2xl p-6 mt-4 font-inter border-2 transition-all hover:border-[var(--error)]"
+          className="rounded-2xl p-6 mt-4 font-inter border-2 transition-all"
           style={{ background: '#fce4e4', borderColor: '#f2b8b5' }}
         >
-          <p className="label-caps mb-1 " style={{ color: 'var(--error)' }}>Danger Zone</p>
+          <p className="label-caps mb-1" style={{ color: '#b3261e' }}>Danger Zone</p>
           <p className="text-sm mb-4 leading-relaxed" style={{ color: '#7a2020' }}>
             Once you delete your account, there is no going back. All entries will be purged from our servers forever.
           </p>
@@ -215,8 +256,7 @@ function SettingsPage() {
             type="button"
             onClick={() => setConfirmDelete(true)}
             disabled={deletingAcc}
-            className="flex items-center gap-2 label-caps px-4 py-2 rounded-full border-2 transition bg-transparent text-[var(--error)] hover:bg-[var(--error)] hover:text-white disabled:opacity-50"
-            style={{ borderColor: 'var(--error)' }}
+            className="flex items-center gap-2 label-caps px-4 py-2 rounded-full border-2 transition bg-transparent disabled:opacity-50 text-[#b3261e] border-[#b3261e] hover:bg-[#b3261e] hover:text-white"
           >
             {deletingAcc && <Loader2 size={14} className="animate-spin" />}
             Delete microjournal account
@@ -236,7 +276,7 @@ function SettingsPage() {
             className="relative rounded-2xl p-7 shadow-2xl w-full max-w-sm animate-in"
             style={{ background: 'var(--surface-container)' }}
           >
-            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--error)', fontFamily: "'Noto Serif', serif" }}>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: '#b3261e', fontFamily: "'Noto Serif', serif" }}>
               Final Warning
             </h3>
             <p className="text-sm mb-6" style={{ color: 'var(--on-surface-variant)' }}>
@@ -253,7 +293,7 @@ function SettingsPage() {
               <button
                 onClick={handleDeleteAccount}
                 className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition hover:opacity-80"
-                style={{ background: 'var(--error)', color: '#fff' }}
+                style={{ background: '#b3261e', color: '#fff' }}
               >
                 Delete My Account
               </button>

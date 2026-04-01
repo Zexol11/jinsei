@@ -9,10 +9,11 @@ import OnThisDayCard from '@/components/OnThisDayCard';
 import { PenLine, X, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface Tag    { id: number; name: string; slug: string; }
 interface Mood   { id: number; label: string; emoji: string; value: number; }
-interface Entry  { id: number; entry_date: string; content: string; title: string | null; mood: Mood; tags: Tag[]; }
+interface Entry  { id: number; entry_date: string; content: string; title: string | null; mood: Mood; tags: Tag[]; cover_image_url?: string | null; }
 
 const PROMPTS = [
   "What's occupying your quiet moments today?",
@@ -25,9 +26,9 @@ const PROMPTS = [
 
 function getGreeting() {
   const h = new Date().getHours();
-  if (h < 12) return 'Morning';
-  if (h < 17) return 'Afternoon';
-  return 'Evening';
+  if (h < 12) return 'Good Morning';
+  if (h < 17) return 'Good Afternoon';
+  return 'Good Evening';
 }
 
 function stripHtml(html: string): string {
@@ -114,7 +115,7 @@ function Dashboard() {
   return (
     <AppLayout>
       {/* ── Greeting Top Bar ──────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-8 md:px-12 xl:px-16 pt-8">
+      <div className="flex items-center justify-between px-6 md:px-10 lg:px-16 pt-8">
         <p style={{ fontFamily: "'Noto Serif', serif", fontSize: '1.05rem', fontWeight: 400, color: 'var(--on-surface)' }}>
           {getGreeting()}, {firstName}.
         </p>
@@ -128,10 +129,10 @@ function Dashboard() {
       </div>
 
       {/* Dashboard gets its own right-side breathing room */}
-      <div className="px-8 md:px-12 xl:px-16 py-8 pt-6" style={{ paddingRight: '400px' }}>
+      <div className="px-6 md:px-10 lg:px-16 lg:pr-[400px] py-8 pt-6">
 
         {/* ── Hero + stats row ──────────────────────────────────────────── */}
-        <div className="flex gap-4 mb-10">
+        <div className="flex flex-col lg:flex-row gap-4 mb-10">
           {/* Current Thought / Today's Entry card */}
           {loading ? (
             <div
@@ -152,33 +153,33 @@ function Dashboard() {
             <Link
               href={`/entry/${format(parseISO(todayEntry.entry_date), 'yyyy-MM-dd')}`}
               className="flex-1 rounded-2xl p-6 flex flex-col justify-between transition group hover:opacity-80"
-              style={{ background: 'color-mix(in srgb, var(--surface-container-high) 50%, #ffffff)', minHeight: '160px' }}
+              style={{ background: '#d1e6d3', minHeight: '160px' }}
             >
               <div>
-                <p style={{ ...inter('0.6rem', 600), letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--primary-dim)', marginBottom: '4px' }}>
+                <p style={{ ...inter('0.6rem', 600), letterSpacing: '0.1em', textTransform: 'uppercase', color: '#3d6645', marginBottom: '4px' }}>
                   Today's Entry
                 </p>
                 <span className="text-xl inline-block mb-3">{todayEntry.mood.emoji}</span>
-                <div style={{ fontFamily: "'Noto Serif', serif", fontSize: '1.25rem', fontWeight: 500, color: 'var(--on-surface)', lineHeight: 1.4 }}>
+                <div style={{ fontFamily: "'Noto Serif', serif", fontSize: '1.25rem', fontWeight: 500, color: '#1c1c1a', lineHeight: 1.4 }}>
                   <p style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {stripHtml(todayEntry.content) || '(Empty)'}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-4">
-                 <span style={{ ...inter('0.75rem', 500), color: 'var(--on-surface-dim)' }}>View Entry →</span>
+                 <span style={{ ...inter('0.75rem', 500), color: '#4a4845' }}>View Entry →</span>
               </div>
             </Link>
           ) : (
             <div
               className="flex-1 rounded-2xl p-6 flex flex-col justify-between"
-              style={{ background: 'var(--primary-container)', minHeight: '160px' }}
+              style={{ background: '#d1e6d3', minHeight: '160px' }}
             >
               <div>
-                <p style={{ ...inter('0.6rem', 600), letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--primary-dim)', marginBottom: '10px' }}>
+                <p style={{ ...inter('0.6rem', 600), letterSpacing: '0.1em', textTransform: 'uppercase', color: '#3d6645', marginBottom: '10px' }}>
                   Current Thought
                 </p>
-                <p style={{ fontFamily: "'Noto Serif', serif", fontSize: '1.35rem', fontWeight: 500, color: 'var(--on-surface)', lineHeight: 1.35, maxWidth: '28ch' }}>
+                <p style={{ fontFamily: "'Noto Serif', serif", fontSize: '1.35rem', fontWeight: 500, color: '#1c1c1a', lineHeight: 1.35, maxWidth: '28ch' }}>
                   {prompt}
                 </p>
               </div>
@@ -188,7 +189,7 @@ function Dashboard() {
             </div>
           )}
 
-          <div className="flex flex-col gap-3 w-48 shrink-0">
+          <div className="flex flex-row lg:flex-col gap-3 w-full lg:w-48 shrink-0">
 
             <div className="rounded-2xl p-5 flex-1" style={{ background: '#f0e6c8' }}>
               <p style={{ ...inter('0.6rem', 600), letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8a7a52', marginBottom: '8px' }}>
@@ -370,6 +371,16 @@ function Dashboard() {
                   </div>
 
                   <div className="flex-1 min-w-0">
+                    {entry.cover_image_url && (
+                      <div className="relative w-full h-[240px] md:h-[320px] mb-5 overflow-hidden rounded-xl bg-gray-100">
+                        <Image
+                          src={entry.cover_image_url}
+                          alt="Cover Photo"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
                     <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: '1.25rem', fontWeight: 600, color: 'var(--on-surface)', lineHeight: 1.3, marginBottom: '8px' }}>
                       {entry.title || timeLabel}
                     </h2>

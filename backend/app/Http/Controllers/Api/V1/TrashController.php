@@ -64,20 +64,27 @@ class TrashController extends Controller
 
         // 1. Extract public IDs from the entry content and delete from Cloudinary
         $content = $entry->content;
+        $publicIds = [];
+
+        // 1. Extract images from Tiptap content
         if (str_contains($content, 'data-public-id')) {
             $dom = new \DOMDocument();
             @$dom->loadHTML('<?xml encoding="utf-8" ?>' . $content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
             $images = $dom->getElementsByTagName('img');
-
-            $publicIds = [];
+            
             foreach ($images as $img) {
                 if ($img instanceof \DOMElement && $img->hasAttribute('data-public-id')) {
                     $publicIds[] = $img->getAttribute('data-public-id');
                 }
             }
-
-            $this->deleteCloudinaryImages($publicIds);
         }
+        
+        // 2. Extract cover photo ID
+        if ($entry->cover_image_url && preg_match('/\/v\d+\/([^\/.]+)\.[a-zA-Z0-9]+$/', $entry->cover_image_url, $matches)) {
+            $publicIds[] = $matches[1];
+        }
+
+        $this->deleteCloudinaryImages($publicIds);
 
         $entry->forceDelete();
 
@@ -95,17 +102,25 @@ class TrashController extends Controller
 
         foreach ($entries as $entry) {
             $content = $entry->content;
+            $publicIds = [];
+
             if (str_contains($content, 'data-public-id')) {
                 $dom = new \DOMDocument();
                 @$dom->loadHTML('<?xml encoding="utf-8" ?>' . $content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
                 $images = $dom->getElementsByTagName('img');
                 
-                $publicIds = [];
                 foreach ($images as $img) {
                     if ($img instanceof \DOMElement && $img->hasAttribute('data-public-id')) {
                         $publicIds[] = $img->getAttribute('data-public-id');
                     }
                 }
+            }
+
+            if ($entry->cover_image_url && preg_match('/\/v\d+\/([^\/.]+)\.[a-zA-Z0-9]+$/', $entry->cover_image_url, $matches)) {
+                $publicIds[] = $matches[1];
+            }
+
+            if (!empty($publicIds)) {
                 $this->deleteCloudinaryImages($publicIds);
             }
             $entry->forceDelete();

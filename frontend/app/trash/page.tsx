@@ -70,13 +70,13 @@ function TrashPage() {
 
   return (
     <AppLayout>
-      <div className="px-8 md:px-12 xl:px-16 py-8">
+      <div className="px-6 md:px-10 lg:px-16 py-8">
 
         {/* Header */}
-        <div className="flex items-start justify-between mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
           <div>
             <h1
-              className="text-3xl font-semibold"
+              className="text-4xl font-semibold"
               style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
             >
               Trash
@@ -88,24 +88,26 @@ function TrashPage() {
           {entries.length > 0 && (
             <button
               onClick={() => setConfirmEmpty(true)}
-              className="flex items-center gap-2 label-caps font-inter px-4 py-2 rounded-full border transition bg-transparent hover:bg-white/40 dark:hover:bg-red-950/20"
-              style={{ borderColor: 'var(--error)', color: 'var(--error)' }}
+              className="flex items-center justify-center gap-2 label-caps font-inter px-5 py-2.5 rounded-full transition-all hover:brightness-110 active:scale-95 shadow-lg"
+              style={{ background: '#b3261e', color: '#fff' }}
             >
-              <AlertTriangle size={12} />
+              <AlertTriangle size={14} />
               Empty Trash
             </button>
           )}
         </div>
 
         {error && (
-          <div className="mb-6 px-4 py-3 rounded-xl text-sm" style={{ background: '#fce4e4', color: 'var(--error)' }}>
+          <div className="vellum-error-box mb-6">
             {error}
           </div>
         )}
 
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--on-surface-dim)' }} />
+        {loading && entries.length === 0 ? (
+          <div className="space-y-4 animate-pulse">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-32 rounded-2xl" style={{ background: 'var(--surface-container-low)' }} />
+            ))}
           </div>
         ) : entries.length === 0 ? (
           <div className="flex flex-col items-center text-center py-32">
@@ -113,8 +115,8 @@ function TrashPage() {
             <p className="text-base font-medium" style={{ color: 'var(--on-surface-dim)' }}>Trash is empty</p>
           </div>
         ) : (
-          <div>
-            {entries.map((entry, idx) => {
+          <div className="space-y-4">
+            {entries.map((entry) => {
               const dateStr    = format(parseISO(entry.entry_date), 'yyyy-MM-dd');
               const dayOfWeek  = format(parseISO(entry.entry_date), 'EEEE');
               const monthDay   = format(parseISO(entry.entry_date), 'MMM d, yyyy').toUpperCase();
@@ -122,67 +124,66 @@ function TrashPage() {
               const isRestoring = actionLoading === `restore-${dateStr}`;
               const isDeleting  = actionLoading === `delete-${dateStr}`;
               const excerpt     = stripHtml(entry.content).slice(0, 200);
-              const isLast      = idx === entries.length - 1;
 
               return (
                 <div
                   key={entry.id}
-                  className="flex gap-8 md:gap-14 py-8"
-                  style={{ borderBottom: isLast ? 'none' : '1px solid var(--outline-variant)' }}
+                  className="rounded-2xl p-6 border border-[var(--outline-variant)]/30 transition-all hover:border-[var(--outline-variant)]/60"
+                  style={{ background: 'var(--surface-container-low)' }}
                 >
-                  {/* Left: date */}
-                  <div className="w-28 shrink-0 pt-0.5">
-                    <p className="label-caps mb-0.5" style={{ color: 'var(--on-surface-dim)' }}>{monthDay}</p>
-                    <p
-                      className="text-xl font-medium"
-                      style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
-                    >
-                      {dayOfWeek}
-                    </p>
-                    <p className="text-xs mt-1" style={{ color: 'var(--on-surface-dim)' }}>{timeDeleted}</p>
-                  </div>
-
-                  {/* Right: content + actions */}
-                  <div className="flex-1 min-w-0">
-                    {entry.title && (
-                      <h2
-                        className="text-lg font-medium mb-1"
+                  <div className="flex flex-col md:flex-row gap-6 md:gap-14">
+                    {/* Left: date */}
+                    <div className="w-full md:w-28 shrink-0">
+                      <p className="label-caps mb-1 opacity-60" style={{ fontSize: '0.65rem' }}>{monthDay}</p>
+                      <p
+                        className="text-2xl md:text-xl font-medium"
                         style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
                       >
-                        {entry.title}
-                      </h2>
-                    )}
-                    <p
-                      className="text-sm leading-relaxed line-clamp-3 mb-4"
-                      style={{ color: 'var(--on-surface-variant)' }}
-                    >
-                      {excerpt || '(empty entry)'}
-                    </p>
+                        {dayOfWeek}
+                      </p>
+                      <p className="text-xs mt-1 opacity-60">{timeDeleted}</p>
+                    </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-5 font-inter">
-                      <button
-                        onClick={() => handleRestore(dateStr)}
-                        disabled={!!actionLoading}
-                        className="flex items-center gap-1.5 label-caps px-3 py-1.5 rounded-lg transition disabled:opacity-40 hover:bg-[var(--surface-variant)]"
-                        style={{ color: 'var(--primary)' }}
+                    {/* Right: content + actions */}
+                    <div className="flex-1 min-w-0">
+                      {entry.title && (
+                        <h2
+                          className="text-lg font-medium mb-1"
+                          style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
+                        >
+                          {entry.title}
+                        </h2>
+                      )}
+                      <p
+                        className="text-sm leading-relaxed line-clamp-3 mb-6"
+                        style={{ color: 'var(--on-surface-variant)' }}
                       >
-                        {isRestoring
-                          ? <Loader2 size={12} className="animate-spin" />
-                          : <RotateCcw size={12} />}
-                        Restore
-                      </button>
-                      <button
-                        onClick={() => { setConfirmDate(dateStr); setConfirmTitle(entry.title || dayOfWeek); }}
-                        disabled={!!actionLoading}
-                        className="flex items-center gap-1.5 label-caps px-3 py-1.5 rounded-lg transition disabled:opacity-40 hover:bg-[var(--surface-variant)]"
-                        style={{ color: 'var(--on-surface-dim)' }}
-                      >
-                        {isDeleting
-                          ? <Loader2 size={12} className="animate-spin" />
-                          : <X size={12} />}
-                        Delete Permanently
-                      </button>
+                        {excerpt || '(empty entry)'}
+                      </p>
+
+                      {/* Actions */}
+                      <div className="flex flex-wrap items-center gap-3 font-inter">
+                        <button
+                          onClick={() => handleRestore(dateStr)}
+                          disabled={!!actionLoading}
+                          className="flex items-center gap-2 label-caps px-4 py-2 rounded-xl transition bg-[var(--primary-container)] text-[var(--primary)] hover:opacity-80 disabled:opacity-40"
+                        >
+                          {isRestoring
+                            ? <Loader2 size={14} className="animate-spin" />
+                            : <RotateCcw size={14} />}
+                          Restore
+                        </button>
+                        <button
+                          onClick={() => { setConfirmDate(dateStr); setConfirmTitle(entry.title || dayOfWeek); }}
+                          disabled={!!actionLoading}
+                          className="flex items-center gap-2 label-caps px-4 py-2 rounded-xl transition border border-[var(--outline-variant)] text-[var(--on-surface-dim)] hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-40"
+                        >
+                          {isDeleting
+                            ? <Loader2 size={14} className="animate-spin" />
+                            : <X size={14} />}
+                          Delete Permanently
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -204,7 +205,7 @@ function TrashPage() {
             className="relative rounded-2xl p-7 shadow-2xl w-full max-w-sm animate-in"
             style={{ background: 'var(--surface-container)' }}
           >
-            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: '#b3261e', fontFamily: "'Noto Serif', serif" }}>
               Delete Permanently?
             </h3>
             <p className="text-sm mb-1" style={{ color: 'var(--on-surface-variant)' }}>
@@ -224,8 +225,8 @@ function TrashPage() {
               </button>
               <button
                 onClick={handleForceDelete}
-                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition hover:opacity-80"
-                style={{ background: 'var(--error)', color: '#fff' }}
+                className="flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition hover:brightness-110 shadow-md"
+                style={{ background: '#b3261e', color: '#fff' }}
               >
                 Delete Forever
               </button>
@@ -246,7 +247,7 @@ function TrashPage() {
             className="relative rounded-2xl p-7 shadow-2xl w-full max-w-sm animate-in"
             style={{ background: 'var(--surface-container)' }}
           >
-            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: '#b3261e', fontFamily: "'Noto Serif', serif" }}>
               Empty Trash?
             </h3>
             <p className="text-sm mb-6" style={{ color: 'var(--on-surface-variant)' }}>
@@ -262,8 +263,8 @@ function TrashPage() {
               </button>
               <button
                 onClick={handleEmptyTrash}
-                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition hover:opacity-80"
-                style={{ background: 'var(--error)', color: '#fff' }}
+                className="flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition hover:brightness-110 shadow-md"
+                style={{ background: '#b3261e', color: '#fff' }}
               >
                 Empty Trash
               </button>

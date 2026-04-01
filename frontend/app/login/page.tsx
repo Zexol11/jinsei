@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/authStore';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const user       = useAuthStore((s) => s.user);
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [password,    setPassword]    = useState('');
   const [error,       setError]       = useState('');
   const [submitting,  setSubmitting]  = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => { if (!loading && user) router.replace('/'); }, [user, loading, router]);
 
@@ -65,12 +67,12 @@ export default function LoginPage() {
         </p>
 
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{ background: '#fce4e4', color: 'var(--error)' }}>
+          <div className="vellum-error-box mb-6">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 font-inter">
           <div>
             <label className="label-caps block mb-1.5" htmlFor="email" style={{ color: 'var(--on-surface-dim)' }}>
               Email
@@ -85,11 +87,21 @@ export default function LoginPage() {
             <label className="label-caps block mb-1.5" htmlFor="password" style={{ color: 'var(--on-surface-dim)' }}>
               Password
             </label>
-            <input
-              id="password" type="password" autoComplete="current-password" required
-              value={password} onChange={e => setPassword(e.target.value)}
-              className="vellum-input" placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" required
+                value={password} onChange={e => setPassword(e.target.value)}
+                className="vellum-input pr-10" placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                style={{ color: 'var(--on-surface-dim)' }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
           <button type="submit" disabled={submitting} className="btn-primary w-full mt-2">
             {submitting ? 'Signing in…' : 'Sign in'}

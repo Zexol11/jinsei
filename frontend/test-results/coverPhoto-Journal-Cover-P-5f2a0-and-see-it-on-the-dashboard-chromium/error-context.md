@@ -1,0 +1,106 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - paragraph [ref=e6]: microjournal
+        - paragraph [ref=e7]: The Digital Vellum
+      - navigation [ref=e8]:
+        - link "Journal" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - img [ref=e10]
+          - generic [ref=e12]: Journal
+        - link "Calendar" [ref=e13] [cursor=pointer]:
+          - /url: /calendar
+          - img [ref=e14]
+          - generic [ref=e16]: Calendar
+        - link "Insights" [ref=e17] [cursor=pointer]:
+          - /url: /insights
+          - img [ref=e18]
+          - generic [ref=e19]: Insights
+        - link "Trash" [ref=e20] [cursor=pointer]:
+          - /url: /trash
+          - img [ref=e21]
+          - generic [ref=e24]: Trash
+      - link "Settings" [ref=e26] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e27]
+        - generic [ref=e30]: Settings
+    - main [ref=e31]:
+      - generic [ref=e32]:
+        - paragraph [ref=e34]: APRIL 1, 2026
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - generic [ref=e38]:
+                - paragraph [ref=e39]: Current Mood
+                - generic [ref=e40]:
+                  - button "😔 terrible" [ref=e41]:
+                    - generic [ref=e43]: 😔
+                    - generic [ref=e44]: terrible
+                  - button "😐 bad" [ref=e45]:
+                    - generic [ref=e47]: 😐
+                    - generic [ref=e48]: bad
+                  - button "🙂 okay" [ref=e49]:
+                    - generic [ref=e51]: 🙂
+                    - generic [ref=e52]: okay
+                  - button "😄 good" [ref=e53]:
+                    - generic [ref=e55]: 😄
+                    - generic [ref=e56]: good
+                  - button "🤩 great" [ref=e57]:
+                    - generic [ref=e59]: 🤩
+                    - generic [ref=e60]: great
+              - textbox "Title of your entry…" [ref=e61]: Test Entry with Cover Photo
+            - button "Insert a photo of today" [ref=e64]:
+              - generic [ref=e65]:
+                - img [ref=e66]
+                - generic [ref=e70]: Insert a photo of today
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - generic [ref=e73]:
+                - button "Bold" [ref=e74] [cursor=pointer]:
+                  - img [ref=e75]
+                - button "Italic" [ref=e77] [cursor=pointer]:
+                  - img [ref=e78]
+                - button "Underline" [ref=e80] [cursor=pointer]:
+                  - img [ref=e81]
+                - button "Strikethrough" [ref=e83] [cursor=pointer]:
+                  - img [ref=e84]
+                - button "Code" [ref=e87] [cursor=pointer]:
+                  - img [ref=e88]
+              - generic [ref=e92]:
+                - button "H1" [ref=e93] [cursor=pointer]:
+                  - img [ref=e94]
+                - button "H2" [ref=e96] [cursor=pointer]:
+                  - img [ref=e97]
+                - button "H3" [ref=e99] [cursor=pointer]:
+                  - img [ref=e100]
+              - generic [ref=e104]:
+                - button "Align Left" [ref=e105] [cursor=pointer]:
+                  - img [ref=e106]
+                - button "Center" [ref=e107] [cursor=pointer]:
+                  - img [ref=e108]
+                - button "Align Right" [ref=e109] [cursor=pointer]:
+                  - img [ref=e110]
+                - button "Justify" [ref=e111] [cursor=pointer]:
+                  - img [ref=e112]
+              - generic [ref=e114]:
+                - button "Bullet List" [ref=e115] [cursor=pointer]:
+                  - img [ref=e116]
+                - button "Ordered List" [ref=e117] [cursor=pointer]:
+                  - img [ref=e118]
+              - button "Upload image" [ref=e123] [cursor=pointer]:
+                - img [ref=e124]
+            - paragraph [ref=e131]: Writing some content for this entry.
+          - generic [ref=e132]:
+            - paragraph [ref=e133]: Tags
+            - textbox "Add tags…" [ref=e136]
+        - generic [ref=e137]:
+          - generic [ref=e141]: 6 Words
+          - generic [ref=e142]:
+            - button "Discard" [ref=e143]
+            - button "Finish Entry" [ref=e144] [cursor=pointer]
+```

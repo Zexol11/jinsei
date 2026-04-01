@@ -55,7 +55,7 @@ function InsightsPage() {
 
   return (
     <AppLayout>
-      <div className="px-8 md:px-12 xl:px-16 py-8">
+      <div className="px-6 md:px-10 lg:px-16 py-8">
 
         {/* Page heading */}
         <div className="mb-10">
@@ -72,7 +72,7 @@ function InsightsPage() {
 
         {loading ? (
           <div className="space-y-6 animate-pulse">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3].map(i => (
                 <div key={i} className="rounded-2xl p-5" style={{ background: 'var(--surface-container)' }}>
                   <div className="h-3 w-1/3 rounded mb-4" style={{ background: 'var(--surface-container-high)' }} />
@@ -94,7 +94,7 @@ function InsightsPage() {
           <div className="space-y-6">
 
             {/* ── Stat cards ──────────────────────────────────────────── */}
-            <div className="grid grid-cols-3 gap-4 font-inter">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 font-inter">
               {[
                 { label: 'Current Streak',  value: streak,       unit: 'Days',     sub: `↑ Best: ${data.max_streak} days`, icon: '🔥' },
                 { label: 'Total Entries',   value: totalEntries, unit: 'Thoughts', sub: '',                                icon: '📖' },
@@ -209,9 +209,9 @@ function InsightsPage() {
               >
                 ✦
               </div>
-              <p className="label-caps mb-3" style={{ color: 'var(--on-surface-dim)' }}>✦ Reflective Summary</p>
+              <p className="label-caps mb-3" style={{ color: 'var(--on-surface-dim)' }}>✦ AI Reflective Summary</p>
               <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}>
-                AI Reflective Summary
+                Reflective Summary
               </h2>
               <p className="text-sm italic leading-relaxed mb-5" style={{ color: 'var(--on-surface-variant)', maxWidth: '50ch' }}>
                 "You tend to feel most creative on Wednesday mornings after short journal entries. Your mood has shown a 12% increase in 'Calm' since you started the daily streak."

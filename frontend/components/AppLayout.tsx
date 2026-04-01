@@ -112,7 +112,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </aside>
 
       {/* ── Main Content ─────────────────────────────────────────────────── */}
-      <main className="flex-1 min-h-screen overflow-x-hidden">
+      <main className="flex-1 min-h-screen overflow-x-hidden pb-20 md:pb-0">
         {children}
       </main>
 

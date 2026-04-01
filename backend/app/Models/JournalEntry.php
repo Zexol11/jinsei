@@ -19,6 +19,8 @@ class JournalEntry extends Model
         'entry_date',
         'title',
         'content',
+        'cover_image_url',
+        'cover_image_caption',
     ];
 
     protected $casts = [
