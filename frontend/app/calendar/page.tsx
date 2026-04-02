@@ -183,25 +183,25 @@ function CalendarPage() {
           <p className="label-caps mb-2" style={{ color: 'var(--on-surface-dim)' }}>Monthly Insights</p>
 
           {/* Dominant mood */}
-          <div className="rounded-2xl p-5 min-h-[110px]" style={{ background: 'var(--surface-container)' }}>
-            <p className="label-caps mb-2" style={{ color: 'var(--on-surface-dim)' }}>Dominant Mood</p>
+          <div className="rounded-2xl p-5 min-h-[110px]" style={{ background: '#2d3c2f' }}>
+            <p className="label-caps mb-2" style={{ color: '#e1e7df' }}>Dominant Mood</p>
             {loading ? (
               <div className="animate-pulse space-y-3 mt-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ background: 'var(--surface-container-highest)' }} />
-                  <div className="h-4 rounded" style={{ background: 'var(--surface-container-highest)', width: '60%' }} />
+                  <div className="w-3 h-3 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }} />
+                  <div className="h-4 rounded" style={{ background: 'rgba(255,255,255,0.1)', width: '60%' }} />
                 </div>
-                <div className="h-3 rounded w-full" style={{ background: 'var(--surface-container-highest)' }} />
+                <div className="h-3 rounded w-full" style={{ background: 'rgba(255,255,255,0.1)' }} />
               </div>
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="w-2 h-2 rounded-full" style={{ background: 'var(--primary)' }} />
-                  <p className="text-base font-medium capitalize" style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}>
+                  <span className="w-2 h-2 rounded-full" style={{ background: '#a7d1a5' }} />
+                  <p className="text-base font-medium capitalize" style={{ color: '#e1e7df', fontFamily: "'Noto Serif', serif" }}>
                     {dominantMood ?? 'Calm & Centered'}
                   </p>
                 </div>
-                <p className="text-xs italic leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
+                <p className="text-xs italic leading-relaxed" style={{ color: '#a7ada5' }}>
                   "12 days marked by serene reflections and steady focus."
                 </p>
               </>
@@ -209,17 +209,17 @@ function CalendarPage() {
           </div>
 
           {/* Writing streak */}
-          <div className="rounded-2xl p-5 min-h-[96px]" style={{ background: 'var(--surface-container)' }}>
-            <p className="label-caps mb-2" style={{ color: 'var(--on-surface-dim)' }}>Writing Streak</p>
+          <div className="rounded-2xl p-5 min-h-[96px]" style={{ background: '#2d3c2f' }}>
+            <p className="label-caps mb-2" style={{ color: '#e1e7df' }}>Writing Streak</p>
             {loading ? (
-              <div className="animate-pulse mt-2 h-8 rounded" style={{ background: 'var(--surface-container-highest)', width: '40%' }} />
+              <div className="animate-pulse mt-2 h-8 rounded" style={{ background: 'rgba(255,255,255,0.1)', width: '40%' }} />
             ) : (
               <p
                 className="text-4xl font-semibold"
-                style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif", lineHeight: 1 }}
+                style={{ color: 'white', fontFamily: "'Noto Serif', serif", lineHeight: 1 }}
               >
                 {insights?.streak ?? '—'}
-                <span className="text-xl font-normal ml-1" style={{ color: 'var(--on-surface-dim)' }}>Days</span>
+                <span className="text-xl font-normal ml-1 font-inter" style={{ color: '#a7ada5' }}>Days</span>
               </p>
             )}
           </div>

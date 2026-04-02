@@ -1,6 +1,6 @@
 'use client';
 
-import JournalEditor, { extractPublicIds } from '@/components/JournalEditor';
+import JournalEditor, { extractPublicIds, extractPublicIdFromUrl } from '@/components/JournalEditor';
 import MoodSelector, { Mood } from '@/components/MoodSelector';
 import TagInput, { Tag } from '@/components/TagInput';
 import withAuth from '@/components/withAuth';
@@ -74,6 +74,10 @@ function EntryPage() {
           setSelectedTags(entryRes.data.tags ?? []);
           setCoverImageUrl(entryRes.data.cover_image_url ?? null);
           setCoverImageCaption(entryRes.data.cover_image_caption ?? '');
+          if (entryRes.data.cover_image_url) {
+            const id = extractPublicIdFromUrl(entryRes.data.cover_image_url);
+            if (id) setTrackedIds(prev => Array.from(new Set([...prev, id])));
+          }
         } else {
           // Check for a local draft
           const draft = localStorage.getItem(`draft-${dateStr}`);
@@ -142,7 +146,10 @@ function EntryPage() {
     try {
       const tagIds       = await resolveTagIds();
       const currentIds   = extractPublicIds(content);
-      if (coverImageUrl) currentIds.push(...extractPublicIds(coverImageUrl));
+      if (coverImageUrl) {
+        const id = extractPublicIdFromUrl(coverImageUrl);
+        if (id) currentIds.push(id);
+      }
       const imagesToDel  = trackedIds.filter(id => !currentIds.includes(id));
 
       const payload = {
@@ -263,9 +270,14 @@ function EntryPage() {
               <CoverImageUpload
                 imageUrl={coverImageUrl}
                 caption={coverImageCaption}
-                onImageChange={(url) => {
+                onImageChange={(url, publicId) => {
                   setCoverImageUrl(url);
-                  if (url) setTrackedIds(prev => [...prev, ...extractPublicIds(url)]);
+                  if (publicId) {
+                    setTrackedIds(prev => Array.from(new Set([...prev, publicId])));
+                  } else if (url) {
+                    const id = extractPublicIdFromUrl(url);
+                    if (id) setTrackedIds(prev => Array.from(new Set([...prev, id])));
+                  }
                 }}
                 onCaptionChange={setCoverImageCaption}
               />

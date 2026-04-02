@@ -115,13 +115,13 @@ function Dashboard() {
   return (
     <AppLayout>
       {/* ── Greeting Top Bar ──────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-6 md:px-10 lg:px-16 pt-8">
+      <div className="flex items-center justify-between pl-6 md:pl-10 lg:pl-16 pr-6 pt-8">
         <p style={{ fontFamily: "'Noto Serif', serif", fontSize: '1.05rem', fontWeight: 400, color: 'var(--on-surface)' }}>
           {getGreeting()}, {firstName}.
         </p>
         <Link
           href="/settings"
-          className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition hover:opacity-80"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition hover:opacity-80"
           style={{ background: 'var(--primary-container)', color: 'var(--primary)' }}
         >
           {firstName.charAt(0).toUpperCase()}
@@ -237,7 +237,7 @@ function Dashboard() {
         {allTags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
             <span style={{ ...inter('0.72rem', 500), color: 'var(--on-surface-dim)', alignSelf: 'center', marginRight: '4px' }}>
-              Filter:
+              Tag Filter:
             </span>
             <button
               onClick={() => setActiveTagIds([])}

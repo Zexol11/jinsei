@@ -138,13 +138,9 @@ class JournalEntryController extends Controller
             'images_to_delete.*' => ['string'],
         ]);
 
-        $entry->update(array_filter([
-            'mood_id' => $data['mood_id'] ?? null,
-            'title'   => array_key_exists('title', $data) ? $data['title'] : $entry->title,
-            'content' => $data['content'] ?? null,
-            'cover_image_url' => array_key_exists('cover_image_url', $data) ? $data['cover_image_url'] : $entry->cover_image_url,
-            'cover_image_caption' => array_key_exists('cover_image_caption', $data) ? $data['cover_image_caption'] : $entry->cover_image_caption,
-        ], fn ($v) => $v !== null));
+        $entry->update($request->only([
+            'mood_id', 'title', 'content', 'cover_image_url', 'cover_image_caption'
+        ]));
 
         if (array_key_exists('tag_ids', $data)) {
             $validTagIds = $request->user()->tags()

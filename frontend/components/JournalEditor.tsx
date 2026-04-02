@@ -29,6 +29,26 @@ export const extractPublicIds = (html: string) => {
     .filter((id): id is string => !!id);
 };
 
+export const extractPublicIdFromUrl = (url: string) => {
+  if (!url || !url.includes('cloudinary.com')) return null;
+  const parts = url.split('/');
+  const uploadIndex = parts.indexOf('upload');
+  if (uploadIndex === -1) return null;
+  
+  const postUpload = parts.slice(uploadIndex + 1);
+  if (postUpload.length === 0) return null;
+  
+  const idParts = (postUpload[0].startsWith('v') && /^\d+$/.test(postUpload[0].slice(1))) 
+    ? postUpload.slice(1) 
+    : postUpload;
+
+  const fileName = idParts.pop();
+  if (!fileName) return null;
+  const lastPart = fileName.split('.')[0];
+  
+  return [...idParts, lastPart].join('/');
+};
+
 
 function ResizableImageView({ node, updateAttributes, selected, editor }: NodeViewProps) {
   const { src, alt, title, publicId, width } = node.attrs;

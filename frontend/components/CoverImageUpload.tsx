@@ -5,7 +5,7 @@ import Image from 'next/image';
 interface CoverImageUploadProps {
   imageUrl: string | null;
   caption: string;
-  onImageChange: (url: string | null) => void;
+  onImageChange: (url: string | null, publicId?: string | null) => void;
   onCaptionChange: (caption: string) => void;
 }
 
@@ -37,7 +37,7 @@ export default function CoverImageUpload({ imageUrl, caption, onImageChange, onC
 
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
-      onImageChange(data.secure_url);
+      onImageChange(data.secure_url, data.public_id);
     } catch (err) {
       console.error(err);
       alert('Failed to upload cover photo');
@@ -54,7 +54,7 @@ export default function CoverImageUpload({ imageUrl, caption, onImageChange, onC
         style={{ width: 'fit-content' }}
       >
         <button
-          onClick={() => { onImageChange(null); onCaptionChange(''); }}
+          onClick={() => { onImageChange(null, null); onCaptionChange(''); }}
           className="absolute -top-3 -right-3 z-10 p-1.5 rounded-full bg-white shadow-md text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
           title="Remove Photo"
         >
