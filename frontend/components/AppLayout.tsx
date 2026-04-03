@@ -45,7 +45,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             className="label-caps mt-1"
             style={{ color: 'var(--on-surface-dim)' }}
           >
-            The Digital Vellum
+            Your Digital Journal
           </p>
         </div>
 

@@ -3,7 +3,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: 'microjournal — The Digital Vellum',
+  title: 'microjournal — Your Digital Journal',
   description: 'A minimal personal journaling app. Write one entry per day.',
 };
 

@@ -20,12 +20,10 @@ export default function OnThisDayCard() {
       try {
         const res = await api.get('/memories/on-this-day', {
           headers: {
-            // Pass user's local timezone to the backend (e.g. "Asia/Manila")
             'X-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone
           }
         });
         setMemories(res.data);
-        // Expand the most recent memory by default if there are any
         if (res.data.length > 0) {
           setExpandedDate(res.data[0].entry_date);
         }

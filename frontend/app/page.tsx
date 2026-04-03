@@ -6,10 +6,11 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { format, isToday, parseISO } from 'date-fns';
 import OnThisDayCard from '@/components/OnThisDayCard';
-import { PenLine, X, ChevronDown } from 'lucide-react';
+import { PenLine, X, ChevronDown, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface Tag    { id: number; name: string; slug: string; }
 interface Mood   { id: number; label: string; emoji: string; value: number; }
@@ -58,6 +59,7 @@ function getMoodStyle(label: string) {
 }
 
 function Dashboard() {
+  const router    = useRouter();
   const user      = useAuthStore((s) => s.user);
   const firstName = user?.name?.split(' ')[0] ?? 'there';
   const prompt    = PROMPTS[new Date().getDate() % PROMPTS.length];
@@ -74,58 +76,173 @@ function Dashboard() {
   const todayEntry    = entries.find(e => isToday(parseISO(e.entry_date)));
   const hasEntryToday = !!todayEntry;
 
+  const [currentPage,        setCurrentPage]        = useState(1);
+  const [hasMore,            setHasMore]            = useState(true);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+
+  const [isProfileOpen,      setIsProfileOpen]      = useState(false);
+  const { logout } = useAuthStore();
+
+  // 1. Initial dashboard core data (insights, tags)
   useEffect(() => {
-    async function fetchData() {
-      if (!loading) setIsFiltering(true);
+    async function fetchCore() {
       try {
-        const [entriesRes, tagsRes, insightsRes] = await Promise.all([
-          api.get('/entries', { params: activeTagIds.length > 0 ? { 'tags[]': activeTagIds } : {} }),
+        const [tagsRes, insightsRes] = await Promise.all([
           api.get('/tags'),
           api.get('/insights', { params: { period: '7_days' } }),
         ]);
-        const list: Entry[] = entriesRes.data.data || entriesRes.data;
-        setEntries(list);
         setAllTags(tagsRes.data);
         setStreak(insightsRes.data.streak || 0);
-        const words = list
+      } catch (err) { console.error(err); }
+    }
+    fetchCore();
+  }, []);
+
+  // 2. Fetch Entries (handles both initial and load more)
+  const fetchEntriesBatch = async (page: number, replace: boolean = false) => {
+    if (page > 1) setIsFetchingNextPage(true);
+    else setLoading(true);
+
+    try {
+      const res = await api.get('/entries', { 
+        params: { 
+          'tags[]': activeTagIds, 
+          page, 
+          per_page: 5,
+          sort: sortOrder === 'recent' ? 'desc' : 'asc'
+        } 
+      });
+      const batch: Entry[] = res.data.data;
+
+      if (replace) {
+        setEntries(batch);
+        // Restore word count calculation for the "Reflections" card (first few entries summary)
+        const words = batch
           .slice(0, 7)
           .reduce((acc, e) => acc + stripHtml(e.content).split(' ').filter(Boolean).length, 0);
         setWordCount(words);
-      } catch (err) {
-        console.error('Failed to fetch data', err);
-      } finally {
-        setLoading(false);
-        setIsFiltering(false);
+      } else {
+        setEntries(prev => [...prev, ...batch]);
       }
+
+      setHasMore(res.data.current_page < res.data.last_page);
+      setCurrentPage(res.data.current_page);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setIsFiltering(false);
+      setIsFetchingNextPage(false);
     }
-    fetchData();
-  }, [activeTagIds]); // eslint-disable-line
+  };
+
+  // Trigger initial list on tag or sort change
+  useEffect(() => {
+    setIsFiltering(true);
+    fetchEntriesBatch(1, true);
+  }, [activeTagIds, sortOrder]); // eslint-disable-line
+
+  // 3. Infinite Scroll Intersection Observer
+  useEffect(() => {
+    if (loading || !hasMore || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          fetchEntriesBatch(currentPage + 1, false);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const sentinel = document.getElementById('infinite-scroll-sentinel');
+    if (sentinel) observer.observe(sentinel);
+
+    return () => { if (sentinel) observer.unobserve(sentinel); };
+  }, [currentPage, hasMore, loading, isFetchingNextPage]);
 
   function toggleTag(id: number) {
     setActiveTagIds(prev => prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]);
   }
 
-  // ── Sort entries client-side ──────────────────────────────
-  const sortedEntries = [...entries].sort((a, b) => {
-    const da = new Date(a.entry_date).getTime();
-    const db = new Date(b.entry_date).getTime();
-    return sortOrder === 'recent' ? db - da : da - db;
-  });
+  // ── Client-side Sort removed in favor of Server-side sorting ─────
+  const sortedEntries = entries;
 
   return (
     <AppLayout>
       {/* ── Greeting Top Bar ──────────────────────────────────────────── */}
-      <div className="flex items-center justify-between pl-6 md:pl-10 lg:pl-16 pr-6 pt-8">
+      <div className="flex items-center justify-between pl-6 md:pl-10 lg:pl-16 pr-6 pt-8 relative">
         <p style={{ fontFamily: "'Noto Serif', serif", fontSize: '1.05rem', fontWeight: 400, color: 'var(--on-surface)' }}>
           {getGreeting()}, {firstName}.
         </p>
-        <Link
-          href="/settings"
-          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition hover:opacity-80"
-          style={{ background: 'var(--primary-container)', color: 'var(--primary)' }}
-        >
-          {firstName.charAt(0).toUpperCase()}
-        </Link>
+
+        <div className="relative">
+          <button
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className="flex items-center gap-2 group transition focus:outline-none"
+          >
+            <div 
+              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition group-hover:opacity-80 active:scale-95"
+              style={{ background: 'var(--primary-container)', color: 'var(--primary)' }}
+            >
+              {firstName.charAt(0).toUpperCase()}
+            </div>
+            <ChevronDown 
+              size={14} 
+              className={`transition-transform duration-300 opacity-40 group-hover:opacity-70 ${isProfileOpen ? 'rotate-180' : ''}`} 
+              style={{ color: 'var(--on-surface)' }} 
+            />
+          </button>
+
+          {/* ── Dropdown ────────────────────────────────────────────────── */}
+          {isProfileOpen && (
+            <>
+              {/* Click-away backdrop */}
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setIsProfileOpen(false)}
+              />
+              
+              <div 
+                className="absolute right-0 mt-3 w-64 rounded-2xl p-5 z-50 shadow-2xl border animate-in fade-in slide-in-from-top-2 duration-200"
+                style={{ 
+                  background: 'var(--surface-container-high)', 
+                  borderColor: 'var(--outline-variant)',
+                  boxShadow: '0 20px 50px -12px rgba(0,0,0,0.25)'
+                }}
+              >
+                <div className="pb-4 border-b mb-3" style={{ borderColor: 'var(--outline-variant)' }}>
+                  <p className="text-[10px] font-bold tracking-[0.12em] opacity-40 mb-2 uppercase" style={{ color: 'var(--on-surface)' }}>Account</p>
+                  <p className="text-xl font-medium leading-tight" style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}>
+                    {user?.name || 'Journalist'}
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <Link
+                    href="/settings"
+                    className="flex items-center gap-4 px-2 py-2.5 rounded-xl transition-colors hover:bg-[var(--surface-variant)] active:opacity-70"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    <Settings size={18} className="opacity-60" style={{ color: 'var(--on-surface)' }} />
+                    <span style={inter('0.925rem', 400, 'var(--on-surface)')}>Settings</span>
+                  </Link>
+
+                  <button
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      logout(() => router.push('/login'));
+                    }}
+                    className="w-full flex items-center gap-4 px-2 py-2.5 rounded-xl transition-colors hover:bg-[var(--surface-variant)] active:opacity-70 group text-left"
+                  >
+                    <LogOut size={18} className="opacity-60" style={{ color: 'var(--on-surface)' }} />
+                    <span style={inter('0.925rem', 400, 'var(--on-surface)')}>Logout</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Dashboard gets its own right-side breathing room */}
@@ -402,6 +519,25 @@ function Dashboard() {
             })}
           </div>
         )}
+
+        {/* Infinite Scroll Sentinel & Footer State */}
+        <div id="infinite-scroll-sentinel" className="h-20 flex items-center justify-center">
+          {isFetchingNextPage && (
+            <div className="flex items-center gap-3 py-6" style={{ color: 'var(--on-surface-dim)' }}>
+              <div className="w-4 h-4 rounded-full border-2 border-primary-dim border-t-transparent animate-spin" />
+              <span className="text-xs font-inter tracking-wide uppercase font-medium">
+                {sortOrder === 'recent' ? 'Fetching older thoughts...' : 'Fetching newer thoughts...'}
+              </span>
+            </div>
+          )}
+          {!hasMore && entries.length > 5 && (
+            <p className="text-xs font-inter uppercase tracking-widest py-10" style={{ color: 'var(--outline-variant)' }}>
+              {sortOrder === 'recent' 
+                ? "You've reached the beginning of your journey" 
+                : "You've caught up with the present"}
+            </p>
+          )}
+        </div>
       </div>
     </AppLayout>
   );

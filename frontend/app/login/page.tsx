@@ -48,7 +48,7 @@ export default function LoginPage() {
         >
           microjournal
         </p>
-        <p className="label-caps mt-1" style={{ color: 'var(--on-surface-dim)' }}>The Digital Vellum</p>
+        <p className="label-caps mt-1" style={{ color: 'var(--on-surface-dim)' }}>Your Digital Journal</p>
       </div>
 
       {/* Form card */}

@@ -8,7 +8,7 @@
   - generic [ref=e12]:
     - generic [ref=e13]:
       - paragraph [ref=e14]: microjournal
-      - paragraph [ref=e15]: The Digital Vellum
+      - paragraph [ref=e15]: Your Digital Journal
     - generic [ref=e16]:
       - heading "Welcome back" [level=1] [ref=e17]
       - paragraph [ref=e18]: Sign in to continue writing.

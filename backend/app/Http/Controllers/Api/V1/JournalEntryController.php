@@ -15,9 +15,10 @@ class JournalEntryController extends Controller
     /** Display a listing of entries, optionally filtered by tag IDs. */
     public function index(Request $request): JsonResponse
     {
+        $sort  = in_array(strtolower($request->query('sort')), ['asc', 'desc']) ? $request->query('sort') : 'desc';
         $query = $request->user()->journalEntries()
             ->with(['mood', 'tags'])
-            ->orderBy('entry_date', 'desc');
+            ->orderBy('entry_date', $sort);
 
         // Optional: filter by one or more tag IDs (OR logic by default)
         if ($request->filled('tags')) {
@@ -33,7 +34,8 @@ class JournalEntryController extends Controller
             }
         }
 
-        return response()->json($query->paginate(15));
+        $perPage = $request->query('per_page', 15);
+        return response()->json($query->paginate($perPage));
     }
 
     /** Get a lightweight list of entry dates and moods for the calendar component. */
