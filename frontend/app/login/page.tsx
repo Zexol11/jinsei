@@ -46,9 +46,9 @@ export default function LoginPage() {
           className="text-2xl italic font-semibold"
           style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif", letterSpacing: '-0.01em' }}
         >
-          microjournal
+          jinsei
         </p>
-        <p className="label-caps mt-1" style={{ color: 'var(--on-surface-dim)' }}>Your Digital Journal</p>
+        <p className="label-caps mt-1" style={{ color: 'var(--on-surface-dim)' }}>your life journal</p>
       </div>
 
       {/* Form card */}

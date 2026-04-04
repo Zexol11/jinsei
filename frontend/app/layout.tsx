@@ -3,7 +3,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: 'microjournal — Your Digital Journal',
+  title: 'jinsei — your life journal',
   description: 'A minimal personal journaling app. Write one entry per day.',
 };
 

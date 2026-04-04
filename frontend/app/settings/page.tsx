@@ -259,7 +259,7 @@ function SettingsPage() {
             className="flex items-center gap-2 label-caps px-4 py-2 rounded-full border-2 transition bg-transparent disabled:opacity-50 text-[#b3261e] border-[#b3261e] hover:bg-[#b3261e] hover:text-white"
           >
             {deletingAcc && <Loader2 size={14} className="animate-spin" />}
-            Delete microjournal account
+            Delete jinsei account
           </button>
         </div>
       </div>

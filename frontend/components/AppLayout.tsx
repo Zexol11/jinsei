@@ -39,13 +39,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
             className="text-base font-semibold italic tracking-tight leading-none"
             style={{ color: 'var(--on-surface)', fontFamily: "'Noto Serif', serif" }}
           >
-            microjournal
+            jinsei
           </p>
           <p
             className="label-caps mt-1"
             style={{ color: 'var(--on-surface-dim)' }}
           >
-            Your Digital Journal
+            your life journal
           </p>
         </div>
 
