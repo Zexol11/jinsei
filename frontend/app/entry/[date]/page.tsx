@@ -12,12 +12,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import AppLayout from '@/components/AppLayout';
 import CoverImageUpload from '@/components/CoverImageUpload';
 
-// ── word count helper ──────────────────────────
 function countWords(html: string) {
   return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).length;
 }
 
-// ── Format time as "HH:MM AM/PM" ──────────────
 function fmtTime(d: Date) {
   return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
@@ -45,12 +43,10 @@ function EntryPage() {
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [coverImageCaption, setCoverImageCaption] = useState('');
 
-  // Draft state
   const [draftSavedAt,   setDraftSavedAt]   = useState<string | null>(null);
   const [isDraftDirty,   setIsDraftDirty]   = useState(false);
   const autoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Load entry ─────────────────────────────────────────────────────────────
   useEffect(() => {
     async function loadData() {
       try {
@@ -123,7 +119,6 @@ function EntryPage() {
     if (!loading && !isExisting && (title || content || coverImageUrl)) scheduleDraft();
   }, [title, content, selectedMoodId, coverImageUrl, coverImageCaption]); // eslint-disable-line
 
-  // ── Resolve tags ───────────────────────────────────────────────────────────
   async function resolveTagIds(): Promise<number[]> {
     const resolved: number[] = [];
     for (const tag of selectedTags) {
@@ -138,7 +133,6 @@ function EntryPage() {
     return resolved;
   }
 
-  // ── Save ───────────────────────────────────────────────────────────────────
   async function handleSave() {
     if (!selectedMoodId) { setError('Please select a mood.'); return; }
     setSaving(true);
@@ -178,7 +172,6 @@ function EntryPage() {
     }
   }
 
-  // ── Delete ─────────────────────────────────────────────────────────────────
   async function handleDelete() {
     setDeleting(true);
     try {
@@ -191,7 +184,6 @@ function EntryPage() {
     }
   }
 
-  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--surface)' }}>
@@ -200,7 +192,6 @@ function EntryPage() {
     );
   }
 
-  // ── Formatted date header ──────────────────────────────────────────────────
   let dateLabel = '';
   try {
     dateLabel = format(parseISO(decodeURIComponent(dateStr)), 'MMMM d, yyyy').toUpperCase();
@@ -302,7 +293,7 @@ function EntryPage() {
         <div
           className="fixed bottom-0 right-0 flex items-center justify-between px-8 md:px-14 py-4"
           style={{
-            left: '224px', // sidebar width (w-56)
+            left: '224px',
             background: 'var(--surface-container-low)',
             borderTop: '1px solid var(--outline-variant)',
             zIndex: 20,
