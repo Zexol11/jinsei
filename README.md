@@ -1,6 +1,6 @@
 # jinsei
 
-previously known as "microjournal", change due to similar names with other journaling apps/site.
+previously known as "microjournal", changed due to similar names with other journaling apps/site.
 
 your life journal. A minimal personal journaling web app. Write one rich-text entry per day, track your mood, and review your history through a calendar and insights dashboard.
 
