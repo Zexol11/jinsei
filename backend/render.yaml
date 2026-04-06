@@ -1,25 +1,20 @@
 services:
   - type: web
     name: jinsei-api
-    env: php
+    env: docker
     region: singapore
     plan: free
-    rootDir: .
-    buildCommand: >
-      composer install --optimize-autoloader --no-dev &&
-      php artisan config:cache &&
-      php artisan route:cache &&
-      php artisan migrate --force
-    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: APP_NAME
         value: jinsei
       - key: APP_ENV
         value: production
-      - key: APP_DEBUG
-        value: false
       - key: APP_KEY
         sync: false
+      - key: APP_DEBUG
+        value: false
       - key: APP_URL
         sync: false
       - key: FRONTEND_URL
