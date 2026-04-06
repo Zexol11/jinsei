@@ -66,7 +66,7 @@ class JournalEntryController extends Controller
     {
         $data = $request->validate([
             'mood_id'          => ['required', 'exists:moods,id'],
-            'entry_date'       => ['required', 'date', 'before_or_equal:today'],
+            'entry_date'       => ['required', 'date', 'before_or_equal:tomorrow'],
             'title'            => ['sometimes', 'nullable', 'string', 'max:255'],
             'content'          => ['required', 'string'],
             'tag_ids'          => ['sometimes', 'array'],
