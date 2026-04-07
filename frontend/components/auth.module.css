@@ -1,0 +1,86 @@
+.formWrapper {
+  position: relative; z-index: 10;
+  display: flex; flex-direction: column; align-items: center;
+  width: 100%; max-width: 360px; padding: 0 24px;
+}
+
+.wordmark {
+  font-family: 'Noto Serif', Georgia, serif;
+  font-style: italic; font-size: 2rem; font-weight: 500;
+  color: rgba(235, 230, 220, 0.95); letter-spacing: -0.01em; margin: 0;
+  animation: fadeInDown 0.9s ease both;
+}
+
+.tagline {
+  font-size: 0.62rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: rgba(200, 195, 185, 0.55); margin: 6px 0 0;
+  animation: fadeInDown 0.9s ease 0.12s both;
+}
+
+.form {
+  width: 100%; margin-top: 2.5rem;
+  display: flex; flex-direction: column; gap: 12px;
+  animation: fadeInUp 0.9s ease 0.28s both;
+}
+
+.inputWrapper { position: relative; width: 100%; }
+
+.input {
+  width: 100%; box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 12px; padding: 15px 18px;
+  font-size: 0.68rem; letter-spacing: 0.13em;
+  color: rgba(235, 230, 220, 0.9); outline: none;
+  transition: border-color 0.25s, background 0.25s;
+  font-family: 'Inter', sans-serif;
+}
+.input::placeholder { color: rgba(200, 195, 185, 0.42); letter-spacing: 0.08em; }
+.input:focus { border-color: rgba(168, 200, 160, 0.5); background: rgba(0, 0, 0, 0.32); }
+
+.eyeBtn {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: rgba(200, 195, 185, 0.48); display: flex; align-items: center; padding: 4px;
+  transition: color 0.2s;
+}
+.eyeBtn:hover { color: rgba(200, 195, 185, 0.85); }
+
+.signInBtn {
+  width: 100%; margin-top: 8px; height: 52px; border-radius: 50px; border: none;
+  background: linear-gradient(135deg, #AACCA2, #91B789);
+  color: #243328; font-size: 0.9rem; font-weight: 500;
+  font-family: 'Inter', sans-serif; cursor: pointer; letter-spacing: 0.03em;
+  transition: opacity 0.2s, transform 0.15s;
+  box-shadow: 0 4px 20px rgba(145, 183, 137, 0.25);
+}
+.signInBtn:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
+.signInBtn:active:not(:disabled) { transform: translateY(0); }
+.signInBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.signUpText {
+  margin-top: 1.5rem; font-size: 0.8rem;
+  color: rgba(200, 195, 185, 0.52);
+  animation: fadeInUp 0.9s ease 0.44s both;
+}
+.signUpLink { color: rgba(168, 200, 160, 0.9); font-weight: 500; text-decoration: none; transition: color 0.2s; }
+.signUpLink:hover { color: #AACCA2; }
+
+.errorBox {
+  width: 100%; box-sizing: border-box;
+  background: rgba(220, 80, 80, 0.12); border: 1px solid rgba(220, 80, 80, 0.25);
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 0.8rem; color: rgba(255, 165, 145, 0.9); margin-top: 1.5rem;
+  animation: fadeInDown 0.3s ease both;
+}
+
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

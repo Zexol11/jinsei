@@ -239,7 +239,7 @@ function SettingsPage() {
               className="flex items-center gap-2 label-caps px-5 py-2.5 rounded-xl border-2 transition hover:bg-[var(--surface-container-high)]"
               style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
             >
-              Sign Out
+              Logout
             </button>
           </div>
         </Row>

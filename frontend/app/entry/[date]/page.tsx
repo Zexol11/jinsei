@@ -291,12 +291,11 @@ function EntryPage() {
 
         {/* ── Sticky bottom bar ─────────────────────────────────────────── */}
         <div
-          className="fixed bottom-0 right-0 flex items-center justify-between px-8 md:px-14 py-4"
+          className="fixed bottom-14 md:bottom-0 left-0 md:left-[224px] right-0 flex items-center justify-between px-4 md:px-14 py-3 md:py-4"
           style={{
-            left: '224px',
             background: 'var(--surface-container-low)',
             borderTop: '1px solid var(--outline-variant)',
-            zIndex: 20,
+            zIndex: 40,
           }}
         >
           {/* Left: word count + draft status */}
@@ -306,7 +305,7 @@ function EntryPage() {
               <span className="label-caps font-inter" style={{ color: 'var(--on-surface-dim)' }}>{words} Words</span>
             </div>
             {!isExisting && draftSavedAt && (
-              <div className="flex items-center gap-1.5">
+              <div className="hidden md:flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: isDraftDirty ? 'var(--outline)' : 'var(--primary-dim)' }} />
                 <span className="label-caps font-inter" style={{ color: 'var(--on-surface-dim)' }}>
                   Draft saved at {draftSavedAt}

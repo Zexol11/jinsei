@@ -306,7 +306,7 @@ function Dashboard() {
             </div>
           )}
 
-          <div className="flex flex-row lg:flex-col gap-3 w-full lg:w-48 shrink-0">
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-3 w-full lg:w-48 shrink-0">
 
             <div className="rounded-2xl p-5 flex-1" style={{ background: '#f0e6c8' }}>
               <p style={{ ...inter('0.6rem', 600), letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8a7a52', marginBottom: '8px' }}>
@@ -323,7 +323,7 @@ function Dashboard() {
                     {streak}
                     <span className='font-inter' style={{ fontSize: '1rem', fontWeight: 400, marginLeft: '4px', color: '#7a6c42' }}>Days</span>
                   </p>
-                  <p style={{ ...inter('0.7rem'), color: '#8a7a52', marginTop: '4px' }}>Calm &amp; Focused</p>
+                  <p style={{ ...inter('0.7rem'), color: '#8a7a52', marginTop: '4px', wordBreak: 'break-word', textWrap: 'balance' }}>Calm &amp; Focused</p>
                 </>
               )}
             </div>
@@ -342,7 +342,7 @@ function Dashboard() {
                   <p style={{ fontFamily: "'Noto Serif', serif", fontSize: '2.2rem', fontWeight: 700, color: '#1e2d3d', lineHeight: 1 }}>
                     {wordCount}
                   </p>
-                  <p style={{ ...inter('0.7rem'), color: '#4a6080', marginTop: '4px' }}>Total Words this week</p>
+                  <p style={{ ...inter('0.7rem'), color: '#4a6080', marginTop: '4px', wordBreak: 'break-word', textWrap: 'balance' }}>Total Words this week</p>
                 </>
               )}
             </div>
