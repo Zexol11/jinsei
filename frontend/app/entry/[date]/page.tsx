@@ -75,7 +75,6 @@ function EntryPage() {
             if (id) setTrackedIds(prev => Array.from(new Set([...prev, id])));
           }
         } else {
-          // Check for a local draft
           const draft = localStorage.getItem(`draft-${dateStr}`);
           if (draft) {
             const parsed = JSON.parse(draft);
@@ -100,9 +99,9 @@ function EntryPage() {
     loadData();
   }, [dateStr]);
 
-  // ── Auto-save draft every 30 s ─────────────────────────────────────────────
+  // ── Auto-save draft every 30s
   const scheduleDraft = useCallback(() => {
-    if (isExisting) return; // only draft new entries
+    if (isExisting) return;
     setIsDraftDirty(true);
     if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
     autoSaveRef.current = setTimeout(() => {
@@ -160,7 +159,6 @@ function EntryPage() {
         await api.patch(`/entries/${dateStr}`, payload);
       } else {
         await api.post('/entries', { entry_date: dateStr, ...payload });
-        // Clear draft on successful save
         localStorage.removeItem(`draft-${dateStr}`);
         setIsExisting(true);
       }

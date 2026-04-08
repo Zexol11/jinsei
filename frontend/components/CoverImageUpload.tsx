@@ -110,7 +110,7 @@ export default function CoverImageUpload({ imageUrl, caption, onImageChange, onC
         {uploading ? (
           <div className="flex flex-col items-center text-gray-500">
             <Loader2 className="w-8 h-8 animate-spin mb-3 text-emerald-600" />
-            <span className="text-sm font-medium">Developing photo...</span>
+            <span className="text-sm font-medium">Uploading photo...</span>
           </div>
         ) : (
           <div className="flex flex-col items-center text-gray-400 group-hover:text-emerald-700 transition-colors">

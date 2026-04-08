@@ -37,7 +37,6 @@ function InsightsPage() {
     fetch_();
   }, [period]);
 
-  // Derived
   const chartData = (data?.mood_trend ?? []).map(i => ({
     date: format(parseISO(i.date), 'EEE'),
     value: i.value ?? 0,
@@ -48,7 +47,6 @@ function InsightsPage() {
   const totalEntries  = data?.total_entries ?? 0;
   const streak        = data?.streak        ?? 0;
 
-  // top mood label from distribution
   const topMood = data?.mood_distribution
     ? Object.entries(data.mood_distribution).sort((a, b) => b[1] - a[1])[0]?.[0]
     : null;
@@ -93,7 +91,7 @@ function InsightsPage() {
         ) : (
           <div className="space-y-6">
 
-            {/* ── Stat cards ──────────────────────────────────────────── */}
+            {/* ── Stat cards ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 font-inter">
               {[
                 { label: 'Current Streak',  value: streak,       unit: 'Days',     sub: `↑ Best: ${data.max_streak} days`, icon: '🔥' },
@@ -124,7 +122,7 @@ function InsightsPage() {
               ))}
             </div>
 
-            {/* ── Chart + distribution ─────────────────────────────────── */}
+            {/* ── Chart + distribution ───*/}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
               {/* Mood Trend */}
@@ -198,7 +196,7 @@ function InsightsPage() {
               </div>
             </div>
 
-            {/* ── Reflective Summary ───────────────────────────────────── */}
+            {/* ── Reflective Summary ──*/}
             <div
               className="rounded-2xl p-7 relative overflow-hidden"
               style={{ background: 'var(--surface-container-high)' }}

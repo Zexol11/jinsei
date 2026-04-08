@@ -264,7 +264,7 @@ function SettingsPage() {
         </div>
       </div>
 
-      {/* ── Confirm Delete Account Modal ────────────────────────────────────── */}
+      {/* ── Confirm Delete Account Modal ────── */}
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
