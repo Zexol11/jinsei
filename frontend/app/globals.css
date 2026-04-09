@@ -31,6 +31,19 @@
 
   /* Semantic */
   --error: #b3261e;
+
+  /* Auth Layout */
+  --auth-bg: var(--surface);
+  --auth-sunbeam-1: rgba(255, 255, 255, 1);
+  --auth-sunbeam-2: rgba(255, 255, 255, 0.6);
+  --auth-sunbeam-3: rgba(255, 255, 255, 0.15);
+  --auth-vignette: rgba(28, 28, 26, 0.05);
+  --auth-input-bg: rgba(255, 255, 255, 0.6);
+  --auth-input-border: rgba(0, 0, 0, 0.18);
+  --auth-particle: rgba(255, 255, 255, 0.9);
+  --auth-frame-shadow-1: rgba(0, 0, 0, 0.04);
+  --auth-frame-shadow-2: rgba(0, 0, 0, 0.02);
+  --auth-branch-shadow: rgba(0, 0, 0, 0.07);
 }
 
 /* ─── Dark Mode Tokens (Midnight Forest) ────────────────────────────────────── */
@@ -57,6 +70,19 @@
   --outline-variant: #434944;
 
   --error: #f2b8b5;
+
+  /* Auth Layout */
+  --auth-bg: var(--surface);
+  --auth-sunbeam-1: rgba(255, 218, 148, 0.38);
+  --auth-sunbeam-2: rgba(255, 215, 142, 0.12);
+  --auth-sunbeam-3: rgba(255, 210, 130, 0.04);
+  --auth-vignette: rgba(0, 5, 2, 0.85);
+  --auth-input-bg: rgba(0, 0, 0, 0.25);
+  --auth-input-border: rgba(255, 255, 255, 0.11);
+  --auth-particle: rgba(255, 240, 210, 0.55);
+  --auth-frame-shadow-1: rgba(0, 0, 0, 0.55);
+  --auth-frame-shadow-2: rgba(0, 0, 0, 0.45);
+  --auth-branch-shadow: rgba(0, 0, 0, 0.4);
 }
 
 /* ─── Tailwind Theme ────────────────────────────────────────────────────────── */

@@ -2,7 +2,7 @@
 .scene {
   position: fixed;
   inset: 0;
-  background: #2B3040;
+  background: var(--auth-bg);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -22,9 +22,9 @@
   height: 220px;     /* beam thickness (blur will spread it to ~200px visually) */
   background: linear-gradient(
     to left,
-    rgba(255, 218, 148, 0.38) 0%,    /* bright right */
-    rgba(255, 215, 142, 0.24) 28%,
-    rgba(255, 210, 130, 0.10) 56%,
+    var(--auth-sunbeam-1) 0%,    /* bright right */
+    var(--auth-sunbeam-2) 28%,
+    var(--auth-sunbeam-3) 56%,
     transparent 78%                  /* fades out on left */
   );
   transform: rotate(-22deg);
@@ -45,9 +45,9 @@
   height: 70px;
   background: linear-gradient(
     to left,
-    rgba(255, 218, 148, 0.20) 0%,
-    rgba(255, 215, 142, 0.12) 32%,
-    rgba(255, 210, 130, 0.04) 60%,
+    var(--auth-sunbeam-2) 0%,
+    var(--auth-sunbeam-3) 32%,
+    transparent 60%,
     transparent 80%
   );
   transform: rotate(-22deg);
@@ -70,7 +70,7 @@
   left: 45%;
   top: 0; bottom: 0;
   width: 50px;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--auth-frame-shadow-1);
   filter: blur(40px);
   pointer-events: none;
   transform: rotate(22deg); /* Counter-rotate to stay vertical relative to screen */
@@ -82,7 +82,7 @@
   left: 75%;
   top: 0; bottom: 0;
   width: 50px;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--auth-frame-shadow-2);
   filter: blur(20px);
   pointer-events: none;
   transform: rotate(22deg); /* Counter-rotate to stay vertical relative to screen */
@@ -109,7 +109,7 @@
   inset: 0;
   background: radial-gradient(
     ellipse 120% 55% at 50% 108%,
-    rgba(15, 18, 32, 0.60) 0%,
+    var(--auth-vignette) 0%,
     transparent 58%
   );
   pointer-events: none;
@@ -161,7 +161,7 @@
 .particle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 240, 210, 0.55);
+  background: var(--auth-particle);
   pointer-events: none; opacity: 0; z-index: 3;
   animation: particleRise var(--dur, 20s) ease-in-out var(--delay, 0s) infinite;
 }
@@ -267,6 +267,6 @@
   }
   
   .scene {
-    background: #1a1e2b; /* Slightly darker fall-back for mobile */
+    background: var(--auth-bg); /* Same fall-back for mobile */
   }
 }

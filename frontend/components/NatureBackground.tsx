@@ -89,7 +89,7 @@ export default function NatureBackground({ children }: { children: React.ReactNo
       {/* ── Branch shadow ── */}
       <div className={styles.branchShadowWrapper}>
         <svg viewBox="0 0 680 580" width="100%" height="100%">
-          <BranchPaths stroke="rgba(0,0,0,0.4)" strokeOpacity={0.6} />
+          <BranchPaths stroke="var(--auth-branch-shadow)" strokeOpacity={1} />
         </svg>
       </div>
 
