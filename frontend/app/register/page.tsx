@@ -9,10 +9,11 @@ import styles from '@/components/auth.module.css';
 import NatureBackground from '@/components/NatureBackground';
 
 export default function RegisterPage() {
-  const user     = useAuthStore((s) => s.user);
-  const register = useAuthStore((s) => s.register);
-  const loading  = useAuthStore((s) => s.loading);
-  const router   = useRouter();
+  const user       = useAuthStore((s) => s.user);
+  const register   = useAuthStore((s) => s.register);
+  const loading    = useAuthStore((s) => s.loading);
+  const initialize = useAuthStore((s) => s.initialize);
+  const router     = useRouter();
 
   const [name,     setName]     = useState('');
   const [email,    setEmail]    = useState('');
@@ -23,7 +24,23 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPwConf,   setShowPwConf]   = useState(false);
 
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   useEffect(() => { if (!loading && user) router.replace('/'); }, [user, loading, router]);
+
+  if (loading || user) {
+    return (
+      <NatureBackground>
+        <div className="flex h-screen w-full items-center justify-center">
+          <span style={{ color: '#4E6952', fontWeight: 500 }} className="animate-pulse">
+            {user ? 'Redirecting...' : 'Loading...'}
+          </span>
+        </div>
+      </NatureBackground>
+    );
+  }
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
