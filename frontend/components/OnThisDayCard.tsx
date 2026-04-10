@@ -42,7 +42,6 @@ export default function OnThisDayCard() {
     return null;
   }
 
-  // Group memories so we can show exactly how many years ago each was
   const currentYear = new Date().getFullYear();
 
   return (

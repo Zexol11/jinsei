@@ -10,8 +10,8 @@ export interface Tag {
 }
 
 interface TagInputProps {
-  allTags: Tag[];           // all user tags for autocomplete dropdown
-  selectedTags: Tag[];      // currently selected tags for this entry
+  allTags: Tag[]; 
+  selectedTags: Tag[];
   onChange: (tags: Tag[]) => void;
   maxTags?: number;
 }
@@ -23,7 +23,6 @@ export default function TagInput({ allTags, selectedTags, onChange, maxTags = 15
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Suggestions: allTags not already selected, filtered by input
   const suggestions = allTags.filter(
     t => !selectedTags.find(s => s.id === t.id) &&
          t.name.includes(inputValue.toLowerCase().trim())
@@ -36,7 +35,6 @@ export default function TagInput({ allTags, selectedTags, onChange, maxTags = 15
 
   function addTag(tag: Tag) {
     if (selectedTags.length >= maxTags) return;
-    // Block by name (covers both saved and new tags)
     if (selectedTags.find(t => t.name === tag.name)) {
       showWarning(`"${tag.name}" is already added`);
       return;
@@ -49,14 +47,12 @@ export default function TagInput({ allTags, selectedTags, onChange, maxTags = 15
 
   function removeTag(tag: Tag) {
     if (tag.id === -1) {
-      // New unsaved tags — match by name since they all share id -1
       onChange(selectedTags.filter(t => !(t.id === -1 && t.name === tag.name)));
     } else {
       onChange(selectedTags.filter(t => t.id !== tag.id));
     }
   }
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -107,12 +103,10 @@ export default function TagInput({ allTags, selectedTags, onChange, maxTags = 15
                 e.preventDefault();
                 const trimmed = inputValue.trim().toLowerCase();
                 if (!trimmed) return;
-                // If there's an exact match in suggestions, add it
                 const match = suggestions.find(t => t.name === trimmed);
                 if (match) {
                   addTag(match);
                 } else {
-                  // Create new tag
                   if (selectedTags.find(t => t.name === trimmed)) {
                     showWarning(`"${trimmed}" is already added`);
                     setInputValue('');

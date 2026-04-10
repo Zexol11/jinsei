@@ -131,8 +131,6 @@ function ResizableImageView({ node, updateAttributes, selected, editor }: NodeVi
   );
 }
 
-// ─── Custom Image Extension ──────────────────────────────────────────────────
-
 const CustomImage = Image.extend({
   addAttributes() {
     return {
@@ -294,12 +292,9 @@ const MenuBar = ({ editor, onImageUploaded }: { editor: Editor | null, onImageUp
   );
 };
 
-// ─── Main Editor Component ───────────────────────────────────────────────────
-
 export default function JournalEditor({ content, onChange, onPublicIdsTracked, editable = true }: JournalEditorProps) {
   const trackedIdsRef = useRef<Set<string>>(new Set());
 
-  // Track initial IDs on mount
   useEffect(() => {
     if (content) {
       const initialIds = extractPublicIds(content);

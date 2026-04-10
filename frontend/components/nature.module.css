@@ -59,11 +59,7 @@
   animation-delay: -4s;
 }
 
-/* ══════════════════════════════════════════════════════════
-   VERTICAL WINDOW FRAME SHADOWS
-   Two vertical dark bars — like the red lines in image 1.
-   They sway slightly in sync with the branch.
-══════════════════════════════════════════════════════════ */
+
 
 .frameBar1 {
   position: absolute;
