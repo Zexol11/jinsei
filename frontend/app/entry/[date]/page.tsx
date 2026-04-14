@@ -287,7 +287,7 @@ function EntryPage() {
           </div>
         </div>
 
-        {/* ── Sticky bottom bar ─────────────────────────────────────────── */}
+        {/* ── Sticky bottom bar ──  */}
         <div
           className="fixed bottom-14 md:bottom-0 left-0 md:left-[224px] right-0 flex items-center justify-between px-4 md:px-14 py-3 md:py-4"
           style={{
@@ -335,7 +335,7 @@ function EntryPage() {
         </div>
       </div>
 
-      {/* ── Delete modal ──────────────────────────────────────────────────── */}
+      {/* ── Delete modal ── */}
       {showDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
