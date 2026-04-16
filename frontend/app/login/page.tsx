@@ -1,10 +1,10 @@
 'use client';
 
-import { useAuthStore } from '@/store/authStore';
 import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 import styles from '@/components/auth.module.css';
 import NatureBackground from '@/components/NatureBackground';
 

@@ -1,10 +1,62 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://jinsei.vercel.app';
+
 export const metadata: Metadata = {
-  title: 'jinsei — your life journal',
-  description: 'A minimal personal journaling app. Write one entry per day.',
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: 'jinsei — your life journal',
+    template: '%s · jinsei',
+  },
+  description:
+    'jinsei is a calm, minimal personal journaling app. Write one entry per day, track your mood, and reflect on your inner world.',
+  keywords: [
+    'journal', 'journaling', 'diary', 'daily journal', 'mood tracker',
+    'personal journal', 'reflection', 'mindfulness', 'writing', 'jinsei',
+  ],
+  authors: [{ name: 'jinsei' }],
+  creator: 'jinsei',
+  publisher: 'jinsei',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: BASE_URL,
+    siteName: 'jinsei',
+    title: 'jinsei — your life journal',
+    description:
+      'A calm, minimal personal journaling app. Write one entry per day, track your mood, and reflect on your inner world.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'jinsei — your life journal',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'jinsei — your life journal',
+    description:
+      'A calm, minimal personal journaling app. Write one entry per day.',
+    images: ['/og-image.png'],
+  },
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f5f3ee' },
+    { media: '(prefers-color-scheme: dark)',  color: '#0d0f0d' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
