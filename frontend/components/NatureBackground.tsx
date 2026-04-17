@@ -27,6 +27,7 @@ const PARTICLES = [
 export function Leaf({ size, color = '#7D9E80', dark = '#4E6952' }: { size: number; color?: string; dark?: string }) {
   return (
     <svg 
+      aria-hidden="true"
       x={-size / 2} 
       y={-size * 1.2} 
       viewBox="-8 -22 16 26" 
@@ -42,7 +43,7 @@ export function Leaf({ size, color = '#7D9E80', dark = '#4E6952' }: { size: numb
 
 export function Petal({ size }: { size: number }) {
   return (
-    <svg viewBox="0 0 20 20" width={size} height={size} style={{ display:'block', overflow: 'visible', filter: 'drop-shadow(0px 3px 4px rgba(0,0,0,0.25))' }}>
+    <svg aria-hidden="true" viewBox="0 0 20 20" width={size} height={size} style={{ display:'block', overflow: 'visible', filter: 'drop-shadow(0px 3px 4px rgba(0,0,0,0.25))' }}>
       <ellipse cx="10" cy="10" rx="8" ry="6" fill="#FCE4EC" opacity="0.85" transform="rotate(-15 10 10)" />
       <path d="M10 6 C8 4 4 6 10 14 C16 6 12 4 10 6Z" fill="#F8BBD0" opacity="0.4" />
     </svg>
@@ -51,7 +52,7 @@ export function Petal({ size }: { size: number }) {
 
 export function Blossom({ angles, rx, ry, cr, fill }: { angles: number[]; rx: number; ry: number; cr: number; fill: string; }) {
   return (
-    <g style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.35))' }}>
+    <g aria-hidden="true" style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.35))' }}>
       {angles.map(r => (
         <ellipse key={r} rx={rx} ry={ry} fill={fill} transform={`rotate(${r}) translate(0,-${ry})`} />
       ))}

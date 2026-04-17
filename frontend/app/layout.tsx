@@ -41,7 +41,12 @@ export const metadata: Metadata = {
     title: 'jinsei — your life journal',
     description:
       'A calm, minimal personal journaling app. Write one entry per day.',
-    images: ['/og-image.png'],
+    images: [
+      {
+        url: '/og-image.png',
+        alt: 'jinsei — your life journal cover image',
+      },
+    ],
   },
   icons: {
     icon: '/icon.png',

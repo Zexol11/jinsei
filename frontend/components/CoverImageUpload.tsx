@@ -68,7 +68,7 @@ export default function CoverImageUpload({ imageUrl, caption, onImageChange, onC
           <div className="relative aspect-square w-full mb-4 overflow-hidden" style={{ background: '#f5f5f5' }}>
             <Image 
               src={imageUrl} 
-              alt="Cover Photo" 
+              alt={caption ? `Cover photo preview: ${caption}` : 'Cover photo upload preview'} 
               fill
               className="object-cover"
             />

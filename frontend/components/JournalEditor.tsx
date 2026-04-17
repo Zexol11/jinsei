@@ -100,7 +100,7 @@ function ResizableImageView({ node, updateAttributes, selected, editor }: NodeVi
     >
       <img
         src={src}
-        alt={alt ?? ''}
+        alt={alt || 'Journal entry image'}
         title={title ?? ''}
         data-public-id={publicId ?? undefined}
         className="rounded-xl w-full h-auto block border border-zinc-800 shadow-xl shadow-black/20 cursor-default"

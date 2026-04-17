@@ -492,7 +492,7 @@ function Dashboard() {
                       <div className="relative w-full h-[240px] md:h-[320px] mb-5 overflow-hidden rounded-xl bg-gray-100">
                         <Image
                           src={entry.cover_image_url}
-                          alt="Cover Photo"
+                          alt={entry.title ? `Cover photo for entry: ${entry.title}` : `Cover photo from ${format(parseISO(entry.entry_date), 'MMMM d, yyyy')}`}
                           fill
                           className="object-cover"
                         />
