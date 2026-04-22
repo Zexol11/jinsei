@@ -53,6 +53,9 @@ export const metadata: Metadata = {
     shortcut: '/icon.png',
     apple: '/icon.png',
   },
+  verification: {
+    google: 'google1e4a47ff1512ea03',
+  },
 };
 
 export const viewport: Viewport = {
@@ -62,6 +65,21 @@ export const viewport: Viewport = {
   ],
   width: 'device-width',
   initialScale: 1,
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'jinsei',
+  description: 'A calm, minimal personal journaling app. Write one entry per day, track your mood, and reflect on your inner world.',
+  applicationCategory: 'LifestyleApplication',
+  operatingSystem: 'Any',
+  url: BASE_URL,
+  screenshot: `${BASE_URL}/og-image.png`,
+  author: {
+    '@type': 'Organization',
+    name: 'jinsei',
+  },
 };
 
 export default function RootLayout({
@@ -77,6 +95,10 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap"
           rel="stylesheet"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className="antialiased font-inter bg-[var(--surface)] text-[var(--on-surface)] transition-colors duration-200">

@@ -2,6 +2,7 @@
 
 import AppLayout from '@/components/AppLayout';
 import withAuth from '@/components/withAuth';
+import LandingPage from '@/components/LandingPage';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { format, isToday, parseISO } from 'date-fns';
@@ -543,4 +544,28 @@ function Dashboard() {
   );
 }
 
-export default withAuth(Dashboard);
+function DashboardWithAuth() {
+  const user = useAuthStore((s) => s.user);
+  const loading = useAuthStore((s) => s.loading);
+  const initialize = useAuthStore((s) => s.initialize);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[var(--surface)]">
+        <span className="text-[var(--on-surface)] opacity-50 text-sm animate-pulse">Loading…</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LandingPage />;
+  }
+
+  return <Dashboard />;
+}
+
+export default DashboardWithAuth;
