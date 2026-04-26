@@ -214,12 +214,26 @@ function InsightsPage() {
               <p className="text-sm italic leading-relaxed mb-5" style={{ color: 'var(--on-surface-variant)', maxWidth: '50ch' }}>
                 "You tend to feel most creative on Wednesday mornings after short journal entries. Your mood has shown a 12% increase in 'Calm' since you started the daily streak."
               </p>
-              <button
-                className="label-caps px-4 py-2 rounded-full border transition font-inter"
-                style={{ borderColor: 'var(--primary-dim)', color: 'var(--primary)', background: 'transparent' }}
-              >
-                Deep Dive Analysis
-              </button>
+              <div className="relative inline-block group/tooltip">
+                <button
+                  disabled
+                  className="label-caps px-4 py-2 rounded-full border font-inter cursor-not-allowed"
+                  style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface-dim)', background: 'transparent', opacity: 0.45, pointerEvents: 'none' }}
+                >
+                  Deep Dive Analysis
+                </button>
+                <div
+                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap pointer-events-none
+                             opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200"
+                  style={{ background: 'var(--surface-container-high)', color: 'var(--on-surface)', boxShadow: '0 4px 16px rgba(0,0,0,0.15)', border: '1px solid var(--outline-variant)', fontFamily: "'Inter', sans-serif", fontSize: '0.72rem' }}
+                >
+                  ✦ Coming soon
+                  <span
+                    className="absolute top-full left-1/2 -translate-x-1/2"
+                    style={{ width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '5px solid var(--surface-container-high)' }}
+                  />
+                </div>
+              </div>
             </div>
 
           </div>
